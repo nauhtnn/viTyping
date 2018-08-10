@@ -10,10 +10,24 @@
       Title="Page1">
     <Viewbox>
         <Grid Loaded="Main_Loaded">
-            <RichTextBox x:Name="tbxF1" HorizontalAlignment="Left" Height="502" Margin="-55,10,0,0" VerticalAlignment="Top" Width="284" BorderBrush="Black"/>
+            <TextBox x:Name="tbxF1"
+                     HorizontalAlignment="Left"
+                     Height="502" Margin="-55,10,0,0"
+                     VerticalAlignment="Top"
+                     Width="284"
+                     BorderBrush="Black"
+                     TextWrapping="Wrap"
+                     AcceptsReturn="True"/>
             <Image x:Name="img" HorizontalAlignment="Left" Height="324" Margin="247,10,0,0" VerticalAlignment="Top" Width="257"/>
             <Button x:Name="btnCheck" Content="Kiểm tra" HorizontalAlignment="Left" Height="33" Margin="301,353,0,0" VerticalAlignment="Top" Width="144" Click="btnCheck_Click" Background="#1c64e7" Foreground="#fff" FontWeight="Bold" FontSize="18"/>
-            <TextBlock x:Name="txtF0" HorizontalAlignment="Left" Height="499" Margin="539,13,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Width="220" TextAlignment="Center"/>
+            <TextBlock x:Name="txtF0"
+                       HorizontalAlignment="Left"
+                       Height="499" Margin="539,13,0,0"
+                       TextWrapping="Wrap"
+                       Text="TextBlock"
+                       VerticalAlignment="Top"
+                       Width="220"
+                       TextAlignment="Left"/>
             <Button x:Name="btnExit" Content="Thoát" Click="btnExit_Click" HorizontalAlignment="Left" Height="30" Margin="301,472,0,0" VerticalAlignment="Top" Width="144" Background="#f15a23" Foreground="#fff" FontWeight="Bold" FontSize="18" RenderTransformOrigin="0.5,1.557" IsEnabled="False"/>
             <!--<Button x:Name="btnSave" Content="Lưu" Click="btnSave_Click" HorizontalAlignment="Left" Height="33" Margin="301,411,0,0" VerticalAlignment="Top" Width="144" Background="#80cc28" Foreground="#fff" FontWeight="Bold" FontSize="18"/>-->
 			<TextBlock x:Name="txtRTime" Background="#ffffbb" Foreground="#00356b" FontSize="28" TextAlignment="Center" Text="0:0" HorizontalAlignment="Left" Height="33" Margin="301,411,0,0" VerticalAlignment="Top" Width="144"/>

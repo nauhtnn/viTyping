@@ -31,7 +31,7 @@ namespace viTyping
             InitializeComponent();
         }
 
-        private void btnCheck_Click(object sender, RoutedEventArgs e)
+        /*private void btnCheck_Click(object sender, RoutedEventArgs e)
         {
             {
                 TextRange r = new TextRange(tbxF1.Document.ContentStart,
@@ -68,7 +68,8 @@ namespace viTyping
 				btnExit.IsEnabled = true;
 				tbxF1.IsEnabled = false;
                 MessageBox.Show("Bạn đã nhập văn bản đúng!", "Xin chúc mừng!");
-				btnCheck.Content = "10 điểm";            }
+				btnCheck.Content = "10 điểm";
+            }
             else
             {
                 TextRange r = new TextRange(tbxF1.Document.ContentStart.GetPositionAtOffset(len + HARD_IDX),
@@ -79,6 +80,23 @@ namespace viTyping
                 //r.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.Red);
                 r.ApplyPropertyValue(RichTextBox.ForegroundProperty, Brushes.Red);
             }
+        }*/
+        private void btnCheck_Click(object sender, RoutedEventArgs e)
+        {
+            if(Grading().CompareTo("10") == 0)
+            {
+                bRunning = false;
+                btnExit.IsEnabled = true;
+                tbxF1.IsEnabled = false;
+                MessageBox.Show("Xin chúc mừng!", "Bạn đã nhập văn bản đúng!");
+                btnCheck.Content = "10 điểm";
+                System.IO.File.WriteAllText("f2.txt", "10 điểm");
+                //System.IO.File.WriteAllText("f1.txt", tbxF1.Text);
+            }
+            else
+            {
+                MessageBox.Show("Bạn chưa nhập văn bản đúng theo mẫu!", "Thông báo!");
+            }
         }
 
         private void Main_Loaded(object sender, RoutedEventArgs e)
@@ -88,7 +106,8 @@ namespace viTyping
             w.WindowState = WindowState.Maximized;
             w.ResizeMode = ResizeMode.NoResize;
 
-			int min = 15;
+			int min = 15,
+                sec = 0;
             if(System.IO.File.Exists("conf.txt"))
             {
                 string[] conf = System.IO.File.ReadAllLines("conf.txt");
@@ -106,6 +125,8 @@ namespace viTyping
                 }
 				if(2 < conf.Length)
 					min = int.Parse(conf[2]);
+                if (3 < conf.Length)
+                    sec = int.Parse(conf[3]);
             }
 
             if (System.IO.File.Exists("f0.txt"))
@@ -113,9 +134,10 @@ namespace viTyping
 
             if (System.IO.File.Exists("f1.txt"))
             {
-                TextRange r = new TextRange(tbxF1.Document.ContentEnd,
-                        tbxF1.Document.ContentEnd);
-                r.Text = System.IO.File.ReadAllText("f1.txt");
+                //TextRange r = new TextRange(tbxF1.Document.ContentEnd,
+                //        tbxF1.Document.ContentEnd);
+                //r.Text = System.IO.File.ReadAllText("f1.txt");
+                tbxF1.Text = System.IO.File.ReadAllText("f1.txt");
             }
 			
 			kDtStart = DateTime.Now;
@@ -124,8 +146,8 @@ namespace viTyping
             mTimer.AutoReset = true;
             mTimer.Enabled = true;
 			
-			kDtDur = new TimeSpan(0, min, 0);
-			dtRemn = new TimeSpan(0, min, 0);
+			kDtDur = new TimeSpan(0, min, sec);
+			dtRemn = new TimeSpan(0, min, sec);
 			txtRTime.Text = "" + dtRemn.Minutes + " : " + dtRemn.Seconds;
         }
 
@@ -136,7 +158,8 @@ namespace viTyping
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            System.IO.File.WriteAllText("f1.txt", new TextRange(tbxF1.Document.ContentStart, tbxF1.Document.ContentEnd).Text);
+            //System.IO.File.WriteAllText("f1.txt", new TextRange(tbxF1.Document.ContentStart, tbxF1.Document.ContentEnd).Text);
+            System.IO.File.WriteAllText("f1.txt", tbxF1.Text);
         }
 		
 		private void UpdateSrvrMsg(object source, System.Timers.ElapsedEventArgs e)
@@ -161,9 +184,12 @@ namespace viTyping
                     {
                         txtRTime.Text = dtRemn.Minutes.ToString() + " : " + dtRemn.Seconds;
 						tbxF1.IsEnabled = false;
-						MessageBox.Show("Bạn chưa nhập văn bản xong!", "Hết giờ!");
-						btnCheck.Content = Grading() + " điểm";
+						MessageBox.Show("Bạn chưa nhập văn bản đúng theo mẫu!", "Hết giờ!");
+                        string txt = Grading() + " điểm";
+                        btnCheck.Content = txt;
 						btnExit.IsEnabled = true;
+                        System.IO.File.WriteAllText("f2.txt", txt);
+                        //System.IO.File.WriteAllText("f1.txt", tbxF1.Text);
                     });
                 }
             }
@@ -171,9 +197,10 @@ namespace viTyping
 		
 		private string Grading()
 		{
-			string txt = new TextRange(tbxF1.Document.ContentStart, tbxF1.Document.ContentEnd).Text;
+            //string txt = new TextRange(tbxF1.Document.ContentStart, tbxF1.Document.ContentEnd).Text;
+            string txt = tbxF1.Text;
 			int l = Levenshtein(txt, txtF0.Text);
-            return "" + l + "=" + Math.Round(10.0f - 10.0f * l / txtF0.Text.Length, 1).ToString();
+            return Math.Round(10.0f - 10.0f * l / txtF0.Text.Length, 1).ToString();
 		}
 		
 		public int Levenshtein(string s, string t)
