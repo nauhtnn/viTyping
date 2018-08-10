@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.IO;
 
 namespace viTyping
 {
@@ -90,12 +91,24 @@ namespace viTyping
                 tbxF1.IsEnabled = false;
                 MessageBox.Show("Xin chúc mừng!", "Bạn đã nhập văn bản đúng!");
                 btnCheck.Content = "10 điểm";
-                System.IO.File.WriteAllText("f2.txt", "10 điểm");
+                AppendGrade("10 điểm");
                 //System.IO.File.WriteAllText("f1.txt", tbxF1.Text);
             }
             else
             {
                 MessageBox.Show("Bạn chưa nhập văn bản đúng theo mẫu!", "Thông báo!");
+            }
+        }
+
+        private void AppendGrade(string txt)
+        {
+            // This text is always added, making the file longer over time
+            // if it is not deleted.
+            using (StreamWriter sw = File.AppendText("f2.txt"))
+            {
+                sw.WriteLine(txt + " at " + DateTime.Now.ToShortDateString() +
+                    " " + DateTime.Now.Hour +
+                    ":" + DateTime.Now.Minute);
             }
         }
 
@@ -188,7 +201,7 @@ namespace viTyping
                         string txt = Grading() + " điểm";
                         btnCheck.Content = txt;
 						btnExit.IsEnabled = true;
-                        System.IO.File.WriteAllText("f2.txt", txt);
+                        AppendGrade(txt);
                         //System.IO.File.WriteAllText("f1.txt", tbxF1.Text);
                     });
                 }
