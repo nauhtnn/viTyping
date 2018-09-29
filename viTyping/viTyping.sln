@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27703.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "viTyping", "viTyping.csproj", "{FBBE4AE4-A2B1-47D8-92C4-4443D10FF0AA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordTest", "..\WordTest\WordTest.csproj", "{8CC09E01-37E6-43FA-9D30-DDB40C57E5B9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{FBBE4AE4-A2B1-47D8-92C4-4443D10FF0AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FBBE4AE4-A2B1-47D8-92C4-4443D10FF0AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FBBE4AE4-A2B1-47D8-92C4-4443D10FF0AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8CC09E01-37E6-43FA-9D30-DDB40C57E5B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CC09E01-37E6-43FA-9D30-DDB40C57E5B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8CC09E01-37E6-43FA-9D30-DDB40C57E5B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8CC09E01-37E6-43FA-9D30-DDB40C57E5B9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
