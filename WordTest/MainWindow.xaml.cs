@@ -43,15 +43,8 @@ namespace WordTest
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                mDoc = mWordApp.Documents.Open(fName.Text, ReadOnly: false);
-            }
-            catch (System.Runtime.InteropServices.COMException ex)
-            {
-                MessageBox.Show("Cannot open document!");
-                return;
-            }
+            if(mDoc == null)
+				return;
             int penalty = 0;
             int i = 0;
             foreach (Microsoft.Office.Interop.Word.Paragraph p in mDoc.Paragraphs)
@@ -71,14 +64,14 @@ namespace WordTest
                 }
                 else if(!MatchNoFormatAlign(p))
                     ++penalty;
-                //output.Text += "b " + p.Range.Font.Bold.ToString() +
+                ////output.Text += "b " + p.Range.Font.Bold.ToString() +
                 //    "i " + p.Range.Font.Italic.ToString() +
                 //    "u " + p.Range.Font.Underline.ToString() + "\n";
                 //if(vReq2)
                 //  ++penalty;
                 ++i;
             }
-            txtPenalty.Text = Math.Round(10 - (float) penalty / i * 10, 1).ToString();
+            txtPenalty.Text = Math.Round(10 - (float) penalty / i * 10, 1).ToString() + " điểm";
         }
 
         private bool MatchAlignRequirement(Microsoft.Office.Interop.Word.Paragraph p, string req)
@@ -86,19 +79,19 @@ namespace WordTest
             if ((req.Contains("l") && p.Alignment != WdParagraphAlignment.wdAlignParagraphLeft) ||
                     !req.Contains("l") && p.Alignment == WdParagraphAlignment.wdAlignParagraphLeft)
             {
-                output.Text += "error para_" + p.Range.Text + "_";
+                //output.Text += "error para_" + p.Range.Text + "_";
                 return false;
             }
             if ((req.Contains("r") && p.Alignment != WdParagraphAlignment.wdAlignParagraphRight) ||
                     !req.Contains("r") && p.Alignment == WdParagraphAlignment.wdAlignParagraphRight)
             {
-                output.Text += "error para_" + p.Range.Text + "_";
+                //output.Text += "error para_" + p.Range.Text + "_";
                 return false;
             }
             if ((req.Contains("c") && p.Alignment != WdParagraphAlignment.wdAlignParagraphCenter) ||
                     !req.Contains("c") && p.Alignment == WdParagraphAlignment.wdAlignParagraphCenter)
             {
-                output.Text += "error para_" + p.Range.Text + "_";
+                //output.Text += "error para_" + p.Range.Text + "_";
                 return false;
             }
             return true;
@@ -109,19 +102,19 @@ namespace WordTest
             if ((req.Contains("b") && r.Font.Bold == 0) ||
                     !req.Contains("b") && r.Font.Bold != 0)
             {
-                output.Text += "error range_" + r.Text + "_";
+                //output.Text += "error range_" + r.Text + "_";
                 return false;
             }
             if ((req.Contains("i") && r.Font.Italic == 0) ||
                     !req.Contains("i") && r.Font.Italic != 0)
             {
-                output.Text += "error range_" + r.Text + "_";
+                //output.Text += "error range_" + r.Text + "_";
                 return false;
             }
             if ((req.Contains("u") && r.Font.Underline == WdUnderline.wdUnderlineNone) ||
                     !req.Contains("u") && r.Font.Underline != WdUnderline.wdUnderlineNone)
             {
-                output.Text += "error range_" + r.Text + "_";
+                //output.Text += "error range_" + r.Text + "_";
                 return false;
             }
             return true;
@@ -156,14 +149,31 @@ namespace WordTest
             mWordApp = new Microsoft.Office.Interop.Word.Application();
             mWordApp.Visible = true;
 
-            fName.Text = "E:/proj/viTyping/WordTest/wordtest.docx";
-            fReq.Text = "E:/proj/viTyping/WordTest/wordtest.txt";
+			string cur_dir = System.IO.Directory.GetCurrentDirectory();
+            fName.Text = cur_dir + "/wordtest.docx";
+            fReq.Text = cur_dir + "/wordtest.txt";
+			
+			if(System.IO.File.Exists(cur_dir + "/sam.txt"))
+			{
+				string sam_file = System.IO.File.ReadAllText(cur_dir + "/sam.txt");
+				output.Text += sam_file;
+			}
 
             vReq1 = new Dictionary<int, string>();
             vReq2 = new Dictionary<int, string>();
             LoadRequirement(fReq.Text);
 
             GetWindow(this).Closing += MainWindow_Closing;
+			
+			try
+            {
+                mDoc = mWordApp.Documents.Open(fName.Text, ReadOnly: false);
+            }
+            catch (System.Runtime.InteropServices.COMException ex)
+            {
+                MessageBox.Show("Cannot open document!" + ex.ToString());
+                mDoc = null;
+            }
         }
 
         private void fName_TextChanged(object sender, TextChangedEventArgs e)

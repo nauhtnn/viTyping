@@ -7,12 +7,13 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid Loaded="Grid_Loaded">
-        <Button Content="Open" Click="Button_Click" HorizontalAlignment="Left" Height="42" Margin="23,10,0,0" VerticalAlignment="Top" Width="117"/>
-        <Button Content="Close" Click="Button_Click_1" HorizontalAlignment="Left" Height="42" Margin="23,72,0,0" VerticalAlignment="Top" Width="117"/>
-        <TextBox x:Name="fName" Text="document name" HorizontalAlignment="Left" Height="22" Margin="164,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="212" TextChanged="fName_TextChanged"/>
-        <TextBlock x:Name="output" HorizontalAlignment="Left" Height="296" Margin="164,72,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Width="602"/>
-        <Button Content="Clear" Click="Button_Click_2" HorizontalAlignment="Left" Height="42" Margin="23,138,0,0" VerticalAlignment="Top" Width="117"/>
-        <TextBox x:Name="fReq" Text="requirement file" HorizontalAlignment="Left" Height="22" Margin="445,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="212" TextChanged="fName_TextChanged"/>
-        <TextBlock x:Name="txtPenalty" HorizontalAlignment="Left" Height="20" Margin="45,218,0,0" TextWrapping="Wrap" Text="pen" VerticalAlignment="Top" Width="47"/>
+        <Button Content="Chấm điểm" Click="Button_Click" HorizontalAlignment="Left" Height="40" Margin="23,10,0,0" VerticalAlignment="Top" Width="120" FontSize="18"/>
+        <!--<Button Content="Close" Click="Button_Click_1" HorizontalAlignment="Left" Height="40" Margin="23,72,0,0" VerticalAlignment="Top" Width="120"/>-->
+        <TextBox Visibility="Hidden" x:Name="fName" Text="document name" HorizontalAlignment="Left" Height="22" Margin="164,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="212" TextChanged="fName_TextChanged"/>
+        <TextBlock x:Name="output" HorizontalAlignment="Left" Height="296" Margin="164,72,0,0" TextWrapping="Wrap"
+			Text="Hãy định dạng văn bản theo mẫu" VerticalAlignment="Top" Width="602" FontSize="24"/>
+        <!--<Button Content="Clear" Click="Button_Click_2" HorizontalAlignment="Left" Height="40" Margin="23,138,0,0" VerticalAlignment="Top" Width="120"/>-->
+        <TextBox Visibility="Hidden" x:Name="fReq" Text="requirement file" HorizontalAlignment="Left" Height="22" Margin="445,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="212" TextChanged="fName_TextChanged"/>
+        <TextBlock x:Name="txtPenalty" HorizontalAlignment="Left" Height="40" Margin="45,218,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontSize="32" />
     </Grid>
 </Window>
