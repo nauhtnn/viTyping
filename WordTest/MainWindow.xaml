@@ -5,15 +5,20 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WordTest"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid Loaded="Grid_Loaded">
-        <Button Content="Chấm điểm" Click="Button_Click" HorizontalAlignment="Left" Height="40" Margin="23,10,0,0" VerticalAlignment="Top" Width="120" FontSize="18"/>
-        <!--<Button Content="Close" Click="Button_Click_1" HorizontalAlignment="Left" Height="40" Margin="23,72,0,0" VerticalAlignment="Top" Width="120"/>-->
-        <TextBox Visibility="Hidden" x:Name="fName" Text="document name" HorizontalAlignment="Left" Height="22" Margin="164,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="212" TextChanged="fName_TextChanged"/>
-        <TextBlock x:Name="output" HorizontalAlignment="Left" Height="296" Margin="164,72,0,0" TextWrapping="Wrap"
-			Text="Hãy định dạng văn bản theo mẫu" VerticalAlignment="Top" Width="602" FontSize="24"/>
-        <!--<Button Content="Clear" Click="Button_Click_2" HorizontalAlignment="Left" Height="40" Margin="23,138,0,0" VerticalAlignment="Top" Width="120"/>-->
-        <TextBox Visibility="Hidden" x:Name="fReq" Text="requirement file" HorizontalAlignment="Left" Height="22" Margin="445,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="212" TextChanged="fName_TextChanged"/>
-        <TextBlock x:Name="txtPenalty" HorizontalAlignment="Left" Height="40" Margin="45,218,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontSize="32" />
-    </Grid>
+        Title="MainWindow"
+		Topmost="True"
+		WindowStyle="None"
+		ResizeMode="NoResize"
+		Height="200">
+    <StackPanel Loaded="Main_Loaded">
+        <Button Content="Chấm điểm" Click="Button_Click" FontSize="18"/>
+        <TextBox Visibility="Collapsed" x:Name="fName" Text="document name" TextWrapping="Wrap" />
+        <TextBlock x:Name="output" TextWrapping="Wrap"
+			Text="Hãy định dạng văn bản theo mẫu" FontSize="18" />
+        <TextBox Visibility="Collapsed" x:Name="fReq" Text="requirement file" TextWrapping="Wrap" />
+        <TextBlock x:Name="txtPenalty" Visibility="Collapsed" TextWrapping="Wrap" FontSize="32" />
+		<TextBox x:Name="substr" Text="input" TextWrapping="Wrap" Width="800" Height="40"/>
+		<TextBlock x:Name="rsubstr" Text="output" TextWrapping="Wrap" Width="800" Height="40"/>
+		<Button Content="subs" Click="Button_Click_2" Height="20"/>
+    </StackPanel>
 </Window>

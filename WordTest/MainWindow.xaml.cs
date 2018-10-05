@@ -143,8 +143,13 @@ namespace WordTest
             catch(NullReferenceException ex) { }
         }
 
-        private void Grid_Loaded(object sender, RoutedEventArgs e)
+        private void Main_Loaded(object sender, RoutedEventArgs e)
         {
+			var desktopWorkingArea = System.Windows.SystemParameters.WorkArea;
+			this.Left = 0;
+			this.Top = desktopWorkingArea.Bottom - this.Height;
+			this.Width = desktopWorkingArea.Width;
+			
             // Open a doc file.
             mWordApp = new Microsoft.Office.Interop.Word.Application();
             mWordApp.Visible = true;
@@ -174,16 +179,23 @@ namespace WordTest
                 MessageBox.Show("Cannot open document!" + ex.ToString());
                 mDoc = null;
             }
-        }
-
-        private void fName_TextChanged(object sender, TextChangedEventArgs e)
-        {
-
+			
         }
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            output.Text = string.Empty;
+            foreach (Microsoft.Office.Interop.Word.Paragraph p in mDoc.Paragraphs)
+			{
+				int i = p.Range.Text.IndexOf(substr.Text);
+				if(-1 < i)
+				{
+					Range r = p.Range;
+					r.Start = p.Range.Start + i;
+					r.End = r.Start + substr.Text.Length;
+					rsubstr.Text = r.Text;
+					break;
+				}
+			}
         }
 
         private void LoadRequirement(string fname)
