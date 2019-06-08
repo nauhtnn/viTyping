@@ -21,11 +21,13 @@ namespace viTyping
     /// </summary>
     public partial class Page1 : Page
     {
-		DateTime kDtStart;
-		TimeSpan kDtDur;
-        TimeSpan dtRemn;
+		DateTime StartTime;
+		TimeSpan TestDuration;
+        TimeSpan RemainingTime;
 		System.Timers.Timer mTimer;
 		bool bRunning = true;
+
+        int CurrentTest = -1;
 		
         public Page1()
         {
@@ -87,7 +89,7 @@ namespace viTyping
             if(Grading().CompareTo("10") == 0)
             {
                 bRunning = false;
-                btnExit.IsEnabled = true;
+                //btnExit.IsEnabled = true;
                 tbxF1.IsEnabled = false;
                 MessageBox.Show("Xin chúc mừng!", "Bạn đã nhập văn bản đúng!");
                 btnCheck.Content = "10 điểm";
@@ -112,21 +114,16 @@ namespace viTyping
             }
         }
 
-        private void Main_Loaded(object sender, RoutedEventArgs e)
+        private void LoadConfig()
         {
-            Window w = Window.GetWindow(this);
-            w.WindowStyle = WindowStyle.None;
-            w.WindowState = WindowState.Maximized;
-            w.ResizeMode = ResizeMode.NoResize;
-
-			int min = 15,
+            int min = 15,
                 sec = 0;
-            if(System.IO.File.Exists("conf.txt"))
+            if (File.Exists("conf.txt"))
             {
-                string[] conf = System.IO.File.ReadAllLines("conf.txt");
-                if(0 < conf.Length)
+                string[] conf = File.ReadAllLines("conf.txt");
+                if (0 < conf.Length)
                     tbxF1.FontSize = txtF0.FontSize = int.Parse(conf[0]);
-                if (1 < conf.Length && System.IO.File.Exists(conf[1]))
+                if (1 < conf.Length && File.Exists(conf[1]))
                 {
                     BitmapImage src = new BitmapImage();
                     src.BeginInit();
@@ -136,38 +133,107 @@ namespace viTyping
 
                     img.Source = src;
                 }
-				if(2 < conf.Length)
-					min = int.Parse(conf[2]);
+                if (2 < conf.Length)
+                    min = int.Parse(conf[2]);
                 if (3 < conf.Length)
                     sec = int.Parse(conf[3]);
             }
+        }
 
-            if (System.IO.File.Exists("f0.txt"))
-                txtF0.Text = System.IO.File.ReadAllText("f0.txt");
+        private void InitTimer()
+        {
+            StartTime = DateTime.Now;
+            mTimer = new System.Timers.Timer(1000);
+            mTimer.Elapsed += UpdateSrvrMsg;
+            mTimer.AutoReset = true;
+            mTimer.Enabled = true;
+        }
 
-            if (System.IO.File.Exists("f1.txt"))
+        private void UpdateCurrentTest()
+        {
+            if (CurrentTest < 0)
+            {
+                if (File.Exists("currentTest.txt"))
+                    CurrentTest = int.Parse(File.ReadAllText("currentTest.txt"));
+                else
+                    CurrentTest = 0;
+            }
+            else
+                ++CurrentTest;
+        }
+
+        private SortedDictionary<string, string> LoadTestConfigs()
+        {
+            string testPath = "test/_" + CurrentTest + ".txt";
+
+            SortedDictionary<string, string> testConfigs = new SortedDictionary<string, string>();
+
+            if (File.Exists(testPath))
+            {
+                foreach (string line in File.ReadAllLines(testPath))
+                {
+                    string[] tokens = line.Split('\t');
+                    if (tokens.Length == 2)
+                        testConfigs.Add(tokens[0], tokens[1]);
+                    else if(tokens.Length == 1)
+                    {
+                        testConfigs.Add(CFG.TEXT.ToString(), tokens[1]);
+                    }
+                }
+            }
+            else
+            {
+                testConfigs.Add(CFG.DURATION_MINUTE.ToString(), "10");
+                testConfigs.Add(CFG.DURATION_SECOND.ToString(), "0");
+                testConfigs.Add(CFG.PICTURE.ToString(), "default_picture.png");
+                testConfigs.Add(CFG.FONT_SIZE.ToString(), "14");
+                testConfigs.Add(CFG.TEXT.ToString(), "asdfghjkl;");
+            }
+            return testConfigs;
+        }
+
+        private void LoadTest()
+        {
+            UpdateCurrentTest();
+
+            SortedDictionary<string, string> testConfigs = LoadTestConfigs();
+
+            int minute = int.Parse(testConfigs[CFG.DURATION_MINUTE.ToString()]);
+            int second = int.Parse(testConfigs[CFG.DURATION_SECOND.ToString()]);
+            TestDuration = new TimeSpan(0, minute, second);
+            RemainingTime = new TimeSpan(0, minute, second);
+            txtRTime.Text = "" + RemainingTime.Minutes + " : " + RemainingTime.Seconds;
+
+            txtF0.Text = testConfigs[CFG.TEXT.ToString()];
+            txtF0.FontSize = int.Parse(testConfigs[CFG.FONT_SIZE.ToString()]);
+            tbxF1.FontSize = txtF0.FontSize;
+
+            if (File.Exists("f1.txt"))
             {
                 //TextRange r = new TextRange(tbxF1.Document.ContentEnd,
                 //        tbxF1.Document.ContentEnd);
                 //r.Text = System.IO.File.ReadAllText("f1.txt");
-                tbxF1.Text = System.IO.File.ReadAllText("f1.txt");
+                tbxF1.Text = File.ReadAllText("f1.txt");
             }
-			
-			kDtStart = DateTime.Now;
-			mTimer = new System.Timers.Timer(1000);
-            mTimer.Elapsed += UpdateSrvrMsg;
-            mTimer.AutoReset = true;
-            mTimer.Enabled = true;
-			
-			kDtDur = new TimeSpan(0, min, sec);
-			dtRemn = new TimeSpan(0, min, sec);
-			txtRTime.Text = "" + dtRemn.Minutes + " : " + dtRemn.Seconds;
+
         }
 
-        private void btnExit_Click(object sender, RoutedEventArgs e)
+        private void Main_Loaded(object sender, RoutedEventArgs e)
         {
-            Window.GetWindow(this).Close();
+            Window w = Window.GetWindow(this);
+            w.WindowStyle = WindowStyle.None;
+            w.WindowState = WindowState.Maximized;
+            w.ResizeMode = ResizeMode.NoResize;
+
+            InitTimer();
+
+            LoadTest();
         }
+
+        //private void btnExit_Click(object sender, RoutedEventArgs e)
+        //{
+        //    Window.GetWindow(this).Close();
+        //}
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
@@ -179,28 +245,28 @@ namespace viTyping
         {
             if (bRunning)
             {
-                if (0 < dtRemn.Ticks)
+                if (0 < RemainingTime.Ticks)
                 {
-                    dtRemn = kDtDur - (DateTime.Now - kDtStart);
+                    RemainingTime = TestDuration - (DateTime.Now - StartTime);
                     Dispatcher.Invoke(() =>
                     {
-                        txtRTime.Text = dtRemn.Minutes.ToString() + " : " + dtRemn.Seconds;
+                        txtRTime.Text = RemainingTime.Minutes.ToString() + " : " + RemainingTime.Seconds;
                     });
                 }
                 else
                 {
-                    dtRemn = new TimeSpan(0, 0, 0);
+                    RemainingTime = new TimeSpan(0, 0, 0);
 					bRunning = false;
-					mTimer.Elapsed -= UpdateSrvrMsg;
-					mTimer.Enabled = false;
+					//mTimer.Elapsed -= UpdateSrvrMsg;
+					//mTimer.Enabled = false;
 					Dispatcher.Invoke(() =>
                     {
-                        txtRTime.Text = dtRemn.Minutes.ToString() + " : " + dtRemn.Seconds;
+                        txtRTime.Text = RemainingTime.Minutes.ToString() + " : " + RemainingTime.Seconds;
 						tbxF1.IsEnabled = false;
 						MessageBox.Show("Bạn chưa nhập văn bản đúng theo mẫu!", "Hết giờ!");
                         string txt = Grading() + " điểm";
                         btnCheck.Content = txt;
-						btnExit.IsEnabled = true;
+						//btnExit.IsEnabled = true;
                         AppendGrade(txt);
                         //System.IO.File.WriteAllText("f1.txt", tbxF1.Text);
                     });
