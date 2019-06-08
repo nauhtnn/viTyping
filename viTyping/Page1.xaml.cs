@@ -125,13 +125,7 @@ namespace viTyping
                     tbxF1.FontSize = txtF0.FontSize = int.Parse(conf[0]);
                 if (1 < conf.Length && File.Exists(conf[1]))
                 {
-                    BitmapImage src = new BitmapImage();
-                    src.BeginInit();
-                    src.UriSource = new Uri(conf[1], UriKind.Relative);
-                    src.CacheOption = BitmapCacheOption.OnLoad;
-                    src.EndInit();
-
-                    img.Source = src;
+                    
                 }
                 if (2 < conf.Length)
                     min = int.Parse(conf[2]);
@@ -170,6 +164,7 @@ namespace viTyping
 
             if (File.Exists(testPath))
             {
+                StringBuilder text = new StringBuilder();
                 foreach (string line in File.ReadAllLines(testPath))
                 {
                     string[] tokens = line.Split('\t');
@@ -177,18 +172,22 @@ namespace viTyping
                         testConfigs.Add(tokens[0], tokens[1]);
                     else if(tokens.Length == 1)
                     {
-                        testConfigs.Add(CFG.TEXT.ToString(), tokens[1]);
+                        text.Append(tokens[0] + "\r\n");
                     }
                 }
+                char[] trimChars = { '\r', '\n', ' ', '\t' };
+                testConfigs.Add(CFG.TEXT.ToString(), text.ToString().Trim(trimChars));
             }
-            else
-            {
+            if(!testConfigs.ContainsKey(CFG.DURATION_MINUTE.ToString()))
                 testConfigs.Add(CFG.DURATION_MINUTE.ToString(), "10");
+            if (!testConfigs.ContainsKey(CFG.DURATION_SECOND.ToString()))
                 testConfigs.Add(CFG.DURATION_SECOND.ToString(), "0");
+            if (!testConfigs.ContainsKey(CFG.PICTURE.ToString()))
                 testConfigs.Add(CFG.PICTURE.ToString(), "default_picture.png");
+            if (!testConfigs.ContainsKey(CFG.FONT_SIZE.ToString()))
                 testConfigs.Add(CFG.FONT_SIZE.ToString(), "14");
+            if (!testConfigs.ContainsKey(CFG.TEXT.ToString()))
                 testConfigs.Add(CFG.TEXT.ToString(), "asdfghjkl;");
-            }
             return testConfigs;
         }
 
@@ -207,6 +206,14 @@ namespace viTyping
             txtF0.Text = testConfigs[CFG.TEXT.ToString()];
             txtF0.FontSize = int.Parse(testConfigs[CFG.FONT_SIZE.ToString()]);
             tbxF1.FontSize = txtF0.FontSize;
+
+            BitmapImage src = new BitmapImage();
+            src.BeginInit();
+            src.UriSource = new Uri(testConfigs[CFG.PICTURE.ToString()], UriKind.Relative);
+            src.CacheOption = BitmapCacheOption.OnLoad;
+            src.EndInit();
+
+            CenterPicture.Source = src;
 
             if (File.Exists("f1.txt"))
             {
@@ -277,7 +284,8 @@ namespace viTyping
 		private string Grading()
 		{
             //string txt = new TextRange(tbxF1.Document.ContentStart, tbxF1.Document.ContentEnd).Text;
-            string txt = tbxF1.Text;
+            char[] trimChars = { '\r', '\n', ' ', '\t' };
+            string txt = tbxF1.Text.Trim(trimChars);
 			int l = Levenshtein(txt, txtF0.Text);
             return Math.Round(10.0f - 10.0f * l / txtF0.Text.Length, 1).ToString();
 		}

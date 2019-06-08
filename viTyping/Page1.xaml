@@ -24,7 +24,7 @@
                        VerticalAlignment="Top"
                        Width="490"
                        TextAlignment="Left"/>
-            <Image x:Name="img" HorizontalAlignment="Left"
+            <Image x:Name="CenterPicture" HorizontalAlignment="Left"
                    Height="320" Margin="510,10,0,0" VerticalAlignment="Top" Width="250"/>
             <Button x:Name="btnCheck" Content="Kiểm tra" HorizontalAlignment="Left"
                     Height="40" Margin="510,340,0,0" VerticalAlignment="Top" Width="144"
