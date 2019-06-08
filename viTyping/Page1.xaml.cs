@@ -26,6 +26,8 @@ namespace viTyping
         TimeSpan RemainingTime;
 		System.Timers.Timer mTimer;
 		bool bRunning = true;
+        const string TEST_FOLDER = "test/";
+        const string PROGRESS_SAVE_FILE = "sav.txt";
 
         int CurrentTest = -1;
 		
@@ -92,9 +94,12 @@ namespace viTyping
                 //btnExit.IsEnabled = true;
                 tbxF1.IsEnabled = false;
                 MessageBox.Show("Xin chúc mừng!", "Bạn đã nhập văn bản đúng!");
-                btnCheck.Content = "10 điểm";
+                //btnCheck.Content = "10 điểm";
                 AppendGrade("10 điểm");
                 //System.IO.File.WriteAllText("f1.txt", tbxF1.Text);
+                UpdateCurrentTestID();
+                SaveCurrentTestID();
+                LoadTest();
             }
             else
             {
@@ -114,25 +119,25 @@ namespace viTyping
             }
         }
 
-        private void LoadConfig()
-        {
-            int min = 15,
-                sec = 0;
-            if (File.Exists("conf.txt"))
-            {
-                string[] conf = File.ReadAllLines("conf.txt");
-                if (0 < conf.Length)
-                    tbxF1.FontSize = txtF0.FontSize = int.Parse(conf[0]);
-                if (1 < conf.Length && File.Exists(conf[1]))
-                {
+        //private void LoadConfig()
+        //{
+        //    int min = 15,
+        //        sec = 0;
+        //    if (File.Exists("conf.txt"))
+        //    {
+        //        string[] conf = File.ReadAllLines("conf.txt");
+        //        if (0 < conf.Length)
+        //            tbxF1.FontSize = txtF0.FontSize = int.Parse(conf[0]);
+        //        if (1 < conf.Length && File.Exists(conf[1]))
+        //        {
                     
-                }
-                if (2 < conf.Length)
-                    min = int.Parse(conf[2]);
-                if (3 < conf.Length)
-                    sec = int.Parse(conf[3]);
-            }
-        }
+        //        }
+        //        if (2 < conf.Length)
+        //            min = int.Parse(conf[2]);
+        //        if (3 < conf.Length)
+        //            sec = int.Parse(conf[3]);
+        //    }
+        //}
 
         private void InitTimer()
         {
@@ -143,12 +148,19 @@ namespace viTyping
             mTimer.Enabled = true;
         }
 
-        private void UpdateCurrentTest()
+        private void SaveCurrentTestID()
+        {
+            if (CurrentTest < 0)
+                CurrentTest = 0;
+            File.WriteAllText(PROGRESS_SAVE_FILE, CurrentTest.ToString());
+        }
+
+        private void UpdateCurrentTestID()
         {
             if (CurrentTest < 0)
             {
-                if (File.Exists("currentTest.txt"))
-                    CurrentTest = int.Parse(File.ReadAllText("currentTest.txt"));
+                if (File.Exists(PROGRESS_SAVE_FILE))
+                    CurrentTest = int.Parse(File.ReadAllText(PROGRESS_SAVE_FILE));
                 else
                     CurrentTest = 0;
             }
@@ -158,7 +170,13 @@ namespace viTyping
 
         private SortedDictionary<string, string> LoadTestConfigs()
         {
-            string testPath = "test/_" + CurrentTest + ".txt";
+            if(File.Exists(PROGRESS_SAVE_FILE))
+                CurrentTest = int.Parse(File.ReadAllText(PROGRESS_SAVE_FILE));
+
+            if (CurrentTest < 0)
+                CurrentTest = 0;
+
+            string testPath = TEST_FOLDER + CurrentTest + ".txt";
 
             SortedDictionary<string, string> testConfigs = new SortedDictionary<string, string>();
 
@@ -193,8 +211,6 @@ namespace viTyping
 
         private void LoadTest()
         {
-            UpdateCurrentTest();
-
             SortedDictionary<string, string> testConfigs = LoadTestConfigs();
 
             int minute = int.Parse(testConfigs[CFG.DURATION_MINUTE.ToString()]);
@@ -207,22 +223,29 @@ namespace viTyping
             txtF0.FontSize = int.Parse(testConfigs[CFG.FONT_SIZE.ToString()]);
             tbxF1.FontSize = txtF0.FontSize;
 
-            BitmapImage src = new BitmapImage();
-            src.BeginInit();
-            src.UriSource = new Uri(testConfigs[CFG.PICTURE.ToString()], UriKind.Relative);
-            src.CacheOption = BitmapCacheOption.OnLoad;
-            src.EndInit();
-
-            CenterPicture.Source = src;
-
-            if (File.Exists("f1.txt"))
+            if(File.Exists(TEST_FOLDER + testConfigs[CFG.PICTURE.ToString()]))
             {
-                //TextRange r = new TextRange(tbxF1.Document.ContentEnd,
-                //        tbxF1.Document.ContentEnd);
-                //r.Text = System.IO.File.ReadAllText("f1.txt");
-                tbxF1.Text = File.ReadAllText("f1.txt");
+                BitmapImage src = new BitmapImage();
+                src.BeginInit();
+                src.UriSource = new Uri(TEST_FOLDER + testConfigs[CFG.PICTURE.ToString()], UriKind.Relative);
+                src.CacheOption = BitmapCacheOption.OnLoad;
+                src.EndInit();
+                CenterPicture.Source = src;
             }
 
+            txtTestID.Text = "Bài " + (CurrentTest + 1);
+            
+            tbxF1.Text = "";
+            tbxF1.IsEnabled = true;
+            bRunning = true;
+
+            //if (File.Exists("f1.txt"))
+            //{
+            //    //TextRange r = new TextRange(tbxF1.Document.ContentEnd,
+            //    //        tbxF1.Document.ContentEnd);
+            //    //r.Text = System.IO.File.ReadAllText("f1.txt");
+            //    tbxF1.Text = File.ReadAllText("f1.txt");
+            //}
         }
 
         private void Main_Loaded(object sender, RoutedEventArgs e)
@@ -232,9 +255,9 @@ namespace viTyping
             w.WindowState = WindowState.Maximized;
             w.ResizeMode = ResizeMode.NoResize;
 
-            InitTimer();
-
             LoadTest();
+
+            InitTimer();
         }
 
         //private void btnExit_Click(object sender, RoutedEventArgs e)
@@ -271,10 +294,10 @@ namespace viTyping
                         txtRTime.Text = RemainingTime.Minutes.ToString() + " : " + RemainingTime.Seconds;
 						tbxF1.IsEnabled = false;
 						MessageBox.Show("Bạn chưa nhập văn bản đúng theo mẫu!", "Hết giờ!");
-                        string txt = Grading() + " điểm";
-                        btnCheck.Content = txt;
+                        //string txt = Grading() + " điểm";
+                        //btnCheck.Content = txt;
 						//btnExit.IsEnabled = true;
-                        AppendGrade(txt);
+                        //AppendGrade(txt);
                         //System.IO.File.WriteAllText("f1.txt", tbxF1.Text);
                     });
                 }

@@ -24,10 +24,14 @@
                        VerticalAlignment="Top"
                        Width="490"
                        TextAlignment="Left"/>
+            <TextBlock x:Name="txtTestID" Background="#1c64e7" Foreground="#fff"
+                       FontSize="28" TextAlignment="Center"
+                       Text="Bài tập" HorizontalAlignment="Left"
+                       Height="40" Margin="563,10,0,0" VerticalAlignment="Top" Width="144"/>
             <Image x:Name="CenterPicture" HorizontalAlignment="Left"
-                   Height="320" Margin="510,10,0,0" VerticalAlignment="Top" Width="250"/>
+                   Height="320" Margin="510,70,0,0" VerticalAlignment="Top" Width="250"/>
             <Button x:Name="btnCheck" Content="Kiểm tra" HorizontalAlignment="Left"
-                    Height="40" Margin="510,340,0,0" VerticalAlignment="Top" Width="144"
+                    Height="40" Margin="563,400,0,0" VerticalAlignment="Top" Width="144"
                     Click="btnCheck_Click" Background="#1c64e7" Foreground="#fff"
                     FontWeight="Bold" FontSize="18"/>
             <!--<Button x:Name="btnExit" Content="Thoát" Click="btnExit_Click" HorizontalAlignment="Left" Height="30" Margin="301,472,0,0" VerticalAlignment="Top" Width="144" Background="#f15a23" Foreground="#fff" FontWeight="Bold" FontSize="18" RenderTransformOrigin="0.5,1.557" IsEnabled="False"/>-->
@@ -35,7 +39,7 @@
             <TextBlock x:Name="txtRTime" Background="#ffffbb" Foreground="#00356b"
                        FontSize="28" TextAlignment="Center"
                        Text="0:0" HorizontalAlignment="Left"
-                       Height="40" Margin="510,411,0,0" VerticalAlignment="Top" Width="144"/>
+                       Height="40" Margin="563,470,0,0" VerticalAlignment="Top" Width="144"/>
         </Grid>
     </Viewbox>
 </Page>
