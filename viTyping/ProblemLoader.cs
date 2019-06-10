@@ -8,7 +8,7 @@ namespace viTyping
 {
     public interface ProblemLoader
     {
-        SortedDictionary<string, string> LoadConfigs();
-        void LoadProblem(int level, int subID);
+        SortedDictionary<string, string> LoadData();
+        void ParseData(int level, int subID);
     }
 }

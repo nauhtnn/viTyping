@@ -82,8 +82,15 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Modification.xaml.cs">
+      <DependentUpon>Modification.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ProblemLoader.cs" />
     <Page Include="Blank.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Modification.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

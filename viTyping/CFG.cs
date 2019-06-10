@@ -4,5 +4,6 @@
     DURATION_SECOND,
     FONT_SIZE,
     PICTURE,
-    TEXT
+    TEXT0,
+    TEXT1
 };

@@ -6,8 +6,7 @@
       xmlns:local="clr-namespace:viTyping"
       mc:Ignorable="d" 
       d:DesignHeight="720" d:DesignWidth="1280"
-      ShowsNavigationUI="False"
-      Title="Page1">
+      ShowsNavigationUI="False">
     <Viewbox>
         <DockPanel Loaded="Main_Loaded" Width="1280" Height="720">
             <TextBlock x:Name="TestDescription" Background="#1c64e7" Foreground="#fff"

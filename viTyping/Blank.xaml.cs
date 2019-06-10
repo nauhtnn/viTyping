@@ -19,7 +19,7 @@ namespace viTyping
     /// <summary>
     /// Interaction logic for Page1.xaml
     /// </summary>
-    public partial class Page1: Page//, ProblemLoader
+    public partial class Page1: Page, ProblemLoader
     {
 		DateTime StartTime;
 		TimeSpan TestDuration;
@@ -99,7 +99,7 @@ namespace viTyping
                 //System.IO.File.WriteAllText("f1.txt", tbxF1.Text);
                 UpdateCurrentTestID();
                 SaveCurrentTestID();
-                LoadProblem(0, 0);
+                ParseData(0, 0);
             }
             else
             {
@@ -148,7 +148,7 @@ namespace viTyping
                 ++CurrentTest;
         }
 
-        public SortedDictionary<string, string> LoadConfigs()
+        public SortedDictionary<string, string> LoadData()
         {
             if(File.Exists(PROGRESS_SAVE_FILE))
                 CurrentTest = int.Parse(File.ReadAllText(PROGRESS_SAVE_FILE));
@@ -189,9 +189,9 @@ namespace viTyping
             return testConfigs;
         }
 
-        public void LoadProblem(int level, int subID)
+        public void ParseData(int level, int subID)
         {
-            SortedDictionary<string, string> testConfigs = LoadConfigs();
+            SortedDictionary<string, string> testConfigs = LoadData();
 
             int minute = int.Parse(testConfigs[CFG.DURATION_MINUTE.ToString()]);
             int second = int.Parse(testConfigs[CFG.DURATION_SECOND.ToString()]);
@@ -235,7 +235,7 @@ namespace viTyping
             w.WindowState = WindowState.Maximized;
             w.ResizeMode = ResizeMode.NoResize;
 
-            LoadProblem(0,0);
+            ParseData(0,0);
 
             InitTimer();
         }
