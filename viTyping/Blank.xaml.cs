@@ -174,7 +174,7 @@ namespace viTyping
                     }
                 }
                 char[] trimChars = { '\r', '\n', ' ', '\t' };
-                testConfigs.Add(CFG.TEXT.ToString(), text.ToString().Trim(trimChars));
+                testConfigs.Add(CFG.TEXT0.ToString(), text.ToString().Trim(trimChars));
             }
             if(!testConfigs.ContainsKey(CFG.DURATION_MINUTE.ToString()))
                 testConfigs.Add(CFG.DURATION_MINUTE.ToString(), "10");
@@ -184,8 +184,8 @@ namespace viTyping
                 testConfigs.Add(CFG.PICTURE.ToString(), "default_picture.png");
             if (!testConfigs.ContainsKey(CFG.FONT_SIZE.ToString()))
                 testConfigs.Add(CFG.FONT_SIZE.ToString(), "14");
-            if (!testConfigs.ContainsKey(CFG.TEXT.ToString()))
-                testConfigs.Add(CFG.TEXT.ToString(), "asdfghjkl;");
+            if (!testConfigs.ContainsKey(CFG.TEXT0.ToString()))
+                testConfigs.Add(CFG.TEXT0.ToString(), "asdfghjkl;");
             return testConfigs;
         }
 
@@ -199,7 +199,7 @@ namespace viTyping
             RemainingTime = new TimeSpan(0, minute, second);
             txtRTime.Text = "" + RemainingTime.Minutes + " : " + RemainingTime.Seconds;
 
-            txtF0.Text = testConfigs[CFG.TEXT.ToString()];
+            txtF0.Text = testConfigs[CFG.TEXT0.ToString()];
             txtF0.FontSize = int.Parse(testConfigs[CFG.FONT_SIZE.ToString()]);
             tbxF1.FontSize = txtF0.FontSize;
 
