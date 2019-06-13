@@ -14,11 +14,16 @@
                        Height="80" DockPanel.Dock="Top" Width="1280"/>
             <TextBlock x:Name="LineIdx0" Height="620" Margin="10,10,0,0"
                        Width="20" Background="LightGray" TextAlignment="Center"/>
-            <TextBox x:Name="UserText"
+            <RichTextBox x:Name="UserText"
                      Height="620" Margin="10,10,0,0"
                      Width="360"
-                     TextWrapping="Wrap"
-                     AcceptsReturn="True" BorderThickness="0"/>
+                     AcceptsReturn="True" BorderThickness="0" GotFocus="UserText_GotFocus">
+                <RichTextBox.Resources>
+                    <Style TargetType="{x:Type Paragraph}">
+                        <Setter Property="Margin" Value="0"/>
+                    </Style>
+                </RichTextBox.Resources>
+            </RichTextBox>
             <TextBlock x:Name="LineIdx1" Height="620" Margin="10,10,0,0"
                        Width="20" Background="LightGray" TextAlignment="Center"/>
             <TextBlock x:Name="TargetText"

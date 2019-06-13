@@ -28,6 +28,7 @@ namespace viTyping
 		bool bRunning = true;
         const string TEST_FOLDER = "blank/";
         const string PROGRESS_SAVE_FILE = TEST_FOLDER + "blank.txt";
+        static List<TextRange> formattedRanges = new List<TextRange>();
 
         int CurrentTest = -1;
 		
@@ -37,23 +38,24 @@ namespace viTyping
         }
         private void btnCheck_Click(object sender, RoutedEventArgs e)
         {
-            if(Grading().CompareTo("10") == 0)
-            {
-                bRunning = false;
-                //btnExit.IsEnabled = true;
-                UserText.IsEnabled = false;
-                MessageBox.Show("Xin chúc mừng!", "Bạn đã nhập văn bản đúng!");
-                //btnCheck.Content = "10 điểm";
-                AppendGrade("10 điểm");
-                //System.IO.File.WriteAllText("f1.txt", UserText.Text);
-                UpdateCurrentTestID();
-                SaveCurrentTestID();
-                ParseData(0, 0);
-            }
-            else
-            {
-                MessageBox.Show("Bạn chưa nhập văn bản đúng theo mẫu!", "Thông báo!");
-            }
+            HighlightPlainTextDiff(UserText.Document, TargetText.Text.Replace("\n", "").ToCharArray());
+            //if(Grading().CompareTo("10") == 0)
+            //{
+            //    bRunning = false;
+            //    //btnExit.IsEnabled = true;
+            //    UserText.IsEnabled = false;
+            //    MessageBox.Show("Xin chúc mừng!", "Bạn đã nhập văn bản đúng!");
+            //    //btnCheck.Content = "10 điểm";
+            //    AppendGrade("10 điểm");
+            //    //System.IO.File.WriteAllText("f1.txt", UserText.Text);
+            //    UpdateCurrentTestID();
+            //    SaveCurrentTestID();
+            //    ParseData(0, 0);
+            //}
+            //else
+            //{
+            //    MessageBox.Show("Bạn chưa nhập văn bản đúng theo mẫu!", "Thông báo!");
+            //}
         }
 
         private void AppendGrade(string txt)
@@ -97,6 +99,33 @@ namespace viTyping
                 ++CurrentTest;
         }
 
+        public static void HighlightPlainTextDiff(FlowDocument document, char[] s)
+        {
+            int s_i = 0;
+            TextPointer pointer = document.ContentStart;
+            while (pointer != null)
+            {
+                if (pointer.GetPointerContext(LogicalDirection.Forward) == TextPointerContext.Text)
+                {
+                    char[] textRun = pointer.GetTextInRun(LogicalDirection.Forward).ToCharArray();
+                    int i = 0;
+                    for (; i < textRun.Length && s_i < s.Length; ++i, ++s_i)
+                    {
+                        if (textRun[i] != s[s_i])
+                        {
+                            TextRange range = new TextRange(pointer.GetPositionAtOffset(i),
+                                pointer.GetPositionAtOffset(textRun.Length));
+                            range.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.Blue);
+                            formattedRanges.Add(range);
+                            return;
+                        }
+                    }
+                }
+
+                pointer = pointer.GetNextContextPosition(LogicalDirection.Forward);
+            }
+        }
+
         public SortedDictionary<string, string> LoadData()
         {
             if(File.Exists(PROGRESS_SAVE_FILE))
@@ -119,7 +148,7 @@ namespace viTyping
                         testConfigs.Add(tokens[0], tokens[1]);
                     else if(tokens.Length == 1)
                     {
-                        text.Append(tokens[0] + "\r\n");
+                        text.Append(tokens[0] + "\n");
                     }
                 }
                 char[] trimChars = { '\r', '\n', ' ', '\t' };
@@ -172,8 +201,8 @@ namespace viTyping
             }
 
             TestDescription.Text = "Bài " + (CurrentTest + 1);
-            
-            UserText.Text = "";
+
+            UserText.Document.Blocks.Clear();
             UserText.IsEnabled = true;
             bRunning = true;
 
@@ -202,12 +231,6 @@ namespace viTyping
         //{
         //    Window.GetWindow(this).Close();
         //}
-
-        private void btnSave_Click(object sender, RoutedEventArgs e)
-        {
-            //System.IO.File.WriteAllText("f1.txt", new TextRange(UserText.Document.ContentStart, UserText.Document.ContentEnd).Text);
-            System.IO.File.WriteAllText("f1.txt", UserText.Text);
-        }
 		
 		private void UpdateSrvrMsg(object source, System.Timers.ElapsedEventArgs e)
         {
@@ -242,14 +265,14 @@ namespace viTyping
             }
         }
 		
-		private string Grading()
-		{
-            //string txt = new TextRange(UserText.Document.ContentStart, UserText.Document.ContentEnd).Text;
-            char[] trimChars = { '\r', '\n', ' ', '\t' };
-            string txt = UserText.Text.Trim(trimChars);
-			int l = Levenshtein(txt, TargetText.Text);
-            return Math.Round(10.0f - 10.0f * l / TargetText.Text.Length, 1).ToString();
-		}
+		//private string Grading()
+		//{
+  //          //string txt = new TextRange(UserText.Document.ContentStart, UserText.Document.ContentEnd).Text;
+  //          char[] trimChars = { '\r', '\n', ' ', '\t' };
+  //          string txt = UserText.Text.Trim(trimChars);
+		//	int l = Levenshtein(txt, TargetText.Text);
+  //          return Math.Round(10.0f - 10.0f * l / TargetText.Text.Length, 1).ToString();
+		//}
 		
 		public int Levenshtein(string s, string t)
 		{
@@ -295,5 +318,12 @@ namespace viTyping
 			// Step 7
 			return d[n, m];
 		}
+
+        private void UserText_GotFocus(object sender, RoutedEventArgs e)
+        {
+            foreach(TextRange i in formattedRanges)
+                i.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.White);
+            formattedRanges.Clear();
+        }
     }
 }

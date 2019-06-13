@@ -137,34 +137,6 @@ namespace viTyping
             //TestDescription.Text = sb.ToString();
         }
 
-        public static void HighlightPlainTextDiff(FlowDocument document, char[] s)
-        {
-            int s_i = 0;
-            TextPointer pointer = document.ContentStart;
-            while (pointer != null)
-            {
-                Console.WriteLine(pointer.GetPointerContext(LogicalDirection.Forward));
-                //Console.WriteLine(pointer.GetTextInRun(LogicalDirection.Forward));
-                if (pointer.GetPointerContext(LogicalDirection.Forward) == TextPointerContext.Text)
-                {
-                    char[] textRun = pointer.GetTextInRun(LogicalDirection.Forward).ToCharArray();
-                    int i = 0;
-                    for(; i < textRun.Length && s_i < s.Length; ++i, ++s_i)
-                    {
-                        if (textRun[i] != s[s_i])
-                        {
-                            TextRange range = new TextRange(pointer.GetPositionAtOffset(i),
-                                pointer.GetPositionAtOffset(textRun.Length));
-                            range.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.Blue);
-                            return;
-                        }
-                    }
-                }
-
-                pointer = pointer.GetNextContextPosition(LogicalDirection.Forward);
-            }
-        }
-
         public static IEnumerable<TextRange> GetAllWordRanges(FlowDocument document)
         {
             //string pattern = @"[^\W\d](\w|[-']{1,2}(?=\w))*";
