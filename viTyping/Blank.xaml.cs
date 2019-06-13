@@ -26,8 +26,11 @@ namespace viTyping
         TimeSpan RemainingTime;
 		System.Timers.Timer mTimer;
 		bool bRunning = true;
-        const string TEST_FOLDER = "blank/";
-        const string PROGRESS_SAVE_FILE = TEST_FOLDER + "blank.txt";
+        public string TopicFolderPath;
+        string ProgressFilePath
+        {
+            get { return TopicFolderPath + "sav.txt"; }
+        }
         static List<TextRange> formattedRanges = new List<TextRange>();
 
         int CurrentTest = -1;
@@ -38,24 +41,23 @@ namespace viTyping
         }
         private void btnCheck_Click(object sender, RoutedEventArgs e)
         {
-            HighlightPlainTextDiff(UserText.Document, TargetText.Text.Replace("\n", "").ToCharArray());
-            //if(Grading().CompareTo("10") == 0)
-            //{
-            //    bRunning = false;
-            //    //btnExit.IsEnabled = true;
-            //    UserText.IsEnabled = false;
-            //    MessageBox.Show("Xin chúc mừng!", "Bạn đã nhập văn bản đúng!");
-            //    //btnCheck.Content = "10 điểm";
-            //    AppendGrade("10 điểm");
-            //    //System.IO.File.WriteAllText("f1.txt", UserText.Text);
-            //    UpdateCurrentTestID();
-            //    SaveCurrentTestID();
-            //    ParseData(0, 0);
-            //}
-            //else
-            //{
-            //    MessageBox.Show("Bạn chưa nhập văn bản đúng theo mẫu!", "Thông báo!");
-            //}
+            if(!HighlightPlainTextDiff(UserText.Document, TargetText.Text.Replace("\n", "").ToCharArray()))
+            {
+                bRunning = false;
+                //btnExit.IsEnabled = true;
+                UserText.IsEnabled = false;
+                MessageBox.Show("Xin chúc mừng!", "Bạn đã nhập văn bản đúng!");
+                //btnCheck.Content = "10 điểm";
+                AppendGrade("10 điểm");
+                //System.IO.File.WriteAllText("f1.txt", UserText.Text);
+                UpdateCurrentTestID();
+                SaveCurrentTestID();
+                ParseData(0, 0);
+            }
+            else
+            {
+                MessageBox.Show("Bạn chưa nhập văn bản đúng theo mẫu!", "Thông báo!");
+            }
         }
 
         private void AppendGrade(string txt)
@@ -83,15 +85,15 @@ namespace viTyping
         {
             if (CurrentTest < 0)
                 CurrentTest = 0;
-            File.WriteAllText(PROGRESS_SAVE_FILE, CurrentTest.ToString());
+            File.WriteAllText(ProgressFilePath, CurrentTest.ToString());
         }
 
         private void UpdateCurrentTestID()
         {
             if (CurrentTest < 0)
             {
-                if (File.Exists(PROGRESS_SAVE_FILE))
-                    CurrentTest = int.Parse(File.ReadAllText(PROGRESS_SAVE_FILE));
+                if (File.Exists(ProgressFilePath))
+                    CurrentTest = int.Parse(File.ReadAllText(ProgressFilePath));
                 else
                     CurrentTest = 0;
             }
@@ -99,7 +101,23 @@ namespace viTyping
                 ++CurrentTest;
         }
 
-        public static void HighlightPlainTextDiff(FlowDocument document, char[] s)
+        private static int SearchUnmatchingWord(char[] text, int i)
+        {
+            if(text[i] == ' ' || text[i] == '\r' ||
+                text[i] == '\n')
+            {
+                while (i < text.Length && (text[i] == ' ' || text[i] == '\r' ||
+                    text[i] == '\n'))
+                    ++i;
+            }
+            else while (i < text.Length && text[i] != ' ' && text[i] != '\r' &&
+                    text[i] != '\n')
+                    ++i;
+
+            return i;
+        }
+
+        private static bool HighlightPlainTextDiff(FlowDocument document, char[] s)
         {
             //Console.WriteLine("-----------------------");
             int s_i = 0;
@@ -118,11 +136,12 @@ namespace viTyping
                     {
                         if (textRun[i] != s[s_i])
                         {
+                            int unmatching_word = SearchUnmatchingWord(textRun, i);
                             TextRange range = new TextRange(pointer.GetPositionAtOffset(i),
-                                pointer.GetPositionAtOffset(textRun.Length));
-                            range.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.Blue);
+                                pointer.GetPositionAtOffset(unmatching_word));
+                            range.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.Red);
                             formattedRanges.Add(range);
-                            return;
+                            return true;
                         }
                     }
                 }
@@ -135,9 +154,9 @@ namespace viTyping
                     pointer.InsertTextInRun("     ");
                     TextRange range = new TextRange(pointer.Paragraph.ElementStart,
                                 pointer.Paragraph.ElementEnd);
-                    range.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.Blue);
+                    range.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.Red);
                     formattedRanges.Add(range);
-                    return;
+                    return true;
                 }
 
                 pointer = pointer.GetNextContextPosition(LogicalDirection.Forward);
@@ -148,20 +167,22 @@ namespace viTyping
                 TextRange range = new TextRange(document.ContentEnd,
                                 document.ContentEnd);
                 range.Text = "     ";
-                range.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.Blue);
+                range.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.Red);
                 formattedRanges.Add(range);
+                return true;
             }
+            return false;
         }
 
         public SortedDictionary<string, string> LoadData()
         {
-            if(File.Exists(PROGRESS_SAVE_FILE))
-                CurrentTest = int.Parse(File.ReadAllText(PROGRESS_SAVE_FILE));
+            if(File.Exists(ProgressFilePath))
+                CurrentTest = int.Parse(File.ReadAllText(ProgressFilePath));
 
             if (CurrentTest < 0)
                 CurrentTest = 0;
 
-            string testPath = TEST_FOLDER + CurrentTest + ".txt";
+            string testPath = TopicFolderPath + CurrentTest + ".txt";
 
             SortedDictionary<string, string> testConfigs = new SortedDictionary<string, string>();
 
@@ -217,11 +238,11 @@ namespace viTyping
             LineIdx0.Text = line_idx.ToString();
             LineIdx1.Text = line_idx.ToString();
 
-            if (File.Exists(TEST_FOLDER + testConfigs[CFG.PICTURE.ToString()]))
+            if (File.Exists(TopicFolderPath + testConfigs[CFG.PICTURE.ToString()]))
             {
                 BitmapImage src = new BitmapImage();
                 src.BeginInit();
-                src.UriSource = new Uri(TEST_FOLDER + testConfigs[CFG.PICTURE.ToString()], UriKind.Relative);
+                src.UriSource = new Uri(TopicFolderPath + testConfigs[CFG.PICTURE.ToString()], UriKind.Relative);
                 src.CacheOption = BitmapCacheOption.OnLoad;
                 src.EndInit();
                 TestPicture.Source = src;
@@ -348,13 +369,13 @@ namespace viTyping
 
         private void UserText_GotFocus(object sender, RoutedEventArgs e)
         {
-            foreach(TextRange i in formattedRanges)
-            {
-                i.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.White);
-                if (i.Text == "     ")
-                    i.Text = "";
-            }
-            formattedRanges.Clear();
+            //foreach(TextRange i in formattedRanges)
+            //{
+            //    i.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.White);
+            //    if (i.Text == "     ")
+            //        i.Text = "";
+            //}
+            //formattedRanges.Clear();
         }
     }
 }

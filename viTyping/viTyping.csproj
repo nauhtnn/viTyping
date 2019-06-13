@@ -83,7 +83,14 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ProblemLoader.cs" />
+    <Compile Include="TopicSelection.xaml.cs">
+      <DependentUpon>TopicSelection.xaml</DependentUpon>
+    </Compile>
     <Page Include="Blank.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TopicSelection.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
