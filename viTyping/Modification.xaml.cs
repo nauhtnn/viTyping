@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace viTyping
 {
@@ -30,6 +31,7 @@ namespace viTyping
         const string PROGRESS_SAVE_FILE = TEST_FOLDER + "modification.txt";
 
         int CurrentTest = -1;
+        string x0;
 
         public SortedDictionary<string, string> LoadData()
         {
@@ -57,14 +59,15 @@ namespace viTyping
                     {
                         if (tokens[0].Contains("<<<<>>>>"))
                             isText0 = false;
-                        if(isText0)
+                        else if(isText0)
                             text0.Append(tokens[0] + "\r\n");
                         else
                             text1.Append(tokens[0] + "\r\n");
                     }
                 }
                 char[] trimChars = { '\r', '\n', ' ', '\t' };
-                testConfigs.Add(CFG.TEXT0.ToString(), text0.ToString().Trim(trimChars));
+                x0 = text0.ToString().Trim(trimChars);
+                testConfigs.Add(CFG.TEXT0.ToString(), x0);
                 testConfigs.Add(CFG.TEXT1.ToString(), text1.ToString().Trim(trimChars));
             }
             if (!testConfigs.ContainsKey(CFG.DURATION_MINUTE.ToString()))
@@ -82,7 +85,28 @@ namespace viTyping
 
         public void ParseData(int level, int subID)
         {
-            throw new NotImplementedException();
+            SortedDictionary<string, string> configs = LoadData();
+            //UserText.Document.Blocks.Add(new Paragraph(new Run(configs[CFG.TEXT0.ToString()])));
+            string text1 = configs[CFG.TEXT1.ToString()];
+            Paragraph p = new Paragraph();
+            foreach (string i in text1.Split('\n'))
+                p.Inlines.Add(i);
+            //bool color = false;
+            //foreach(string s in text1.Split('_'))
+            //{
+            //    if (color)
+            //    {
+            //        Run r = new Run(s);
+            //        r.Background = new SolidColorBrush(Colors.Blue);
+            //        p.Inlines.Add(r);
+            //    }
+            //    else
+            //    {
+            //        p.Inlines.Add(s);
+            //    }
+            //    color = !color;
+            //}            
+            UserText.Document.Blocks.Add(p);
         }
 
         private void Main_Loaded(object sender, RoutedEventArgs e)
@@ -91,6 +115,80 @@ namespace viTyping
             w.WindowStyle = WindowStyle.None;
             w.WindowState = WindowState.Maximized;
             w.ResizeMode = ResizeMode.NoResize;
+
+            ParseData(0, 0);
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            HighlightPlainTextDiff(UserText.Document, x0.Replace("\n", "").ToCharArray());
+            //string[] x = x0.Split(' ');
+            ////x0.
+            //IEnumerable<TextRange> wordRanges = GetAllWordRanges(UserText.Document);
+            //StringBuilder sb = new StringBuilder();
+            //foreach (TextRange wordRange in wordRanges)
+            //{
+            //    //if (wordRange.Text == x[i++])
+            //    //{
+            //    //    wordRange.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Red);
+            //    //}
+            //    sb.Append(wordRange.Text + "__");
+            //}
+            //TestDescription.Text = sb.ToString();
+        }
+
+        public static void HighlightPlainTextDiff(FlowDocument document, char[] s)
+        {
+            int s_i = 0;
+            TextPointer pointer = document.ContentStart;
+            while (pointer != null)
+            {
+                Console.WriteLine(pointer.GetPointerContext(LogicalDirection.Forward));
+                //Console.WriteLine(pointer.GetTextInRun(LogicalDirection.Forward));
+                if (pointer.GetPointerContext(LogicalDirection.Forward) == TextPointerContext.Text)
+                {
+                    char[] textRun = pointer.GetTextInRun(LogicalDirection.Forward).ToCharArray();
+                    int i = 0;
+                    for(; i < textRun.Length && s_i < s.Length; ++i, ++s_i)
+                    {
+                        if (textRun[i] != s[s_i])
+                        {
+                            TextRange range = new TextRange(pointer.GetPositionAtOffset(i),
+                                pointer.GetPositionAtOffset(textRun.Length));
+                            range.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.Blue);
+                            return;
+                        }
+                    }
+                }
+
+                pointer = pointer.GetNextContextPosition(LogicalDirection.Forward);
+            }
+        }
+
+        public static IEnumerable<TextRange> GetAllWordRanges(FlowDocument document)
+        {
+            //string pattern = @"[^\W\d](\w|[-']{1,2}(?=\w))*";
+            TextPointer pointer = document.ContentStart;
+            while (pointer != null)
+            {
+                if (pointer.GetPointerContext(LogicalDirection.Forward) == TextPointerContext.Text)
+                {
+                    string textRun = pointer.GetTextInRun(LogicalDirection.Forward);
+                    yield return new TextRange(pointer.GetPositionAtOffset(0),
+                        pointer.GetPositionAtOffset(textRun.Length));
+                    //MatchCollection matches = Regex.Matches(textRun, pattern);
+                    //foreach (Match match in matches)
+                    //{
+                    //    int startIndex = match.Index;
+                    //    int length = match.Length;
+                    //    TextPointer start = pointer.GetPositionAtOffset(startIndex);
+                    //    TextPointer end = start.GetPositionAtOffset(length);
+                    //    yield return new TextRange(start, end);
+                    //}
+                }
+
+                pointer = pointer.GetNextContextPosition(LogicalDirection.Forward);
+            }
         }
     }
 }

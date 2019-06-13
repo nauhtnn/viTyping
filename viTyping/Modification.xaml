@@ -12,7 +12,8 @@
             <TextBlock x:Name="TestDescription" Background="#1c64e7" Foreground="#fff"
                        FontSize="28"
                        Height="80" DockPanel.Dock="Top" Width="1280"/>
-            <TextBox Text="txt" />
+            <RichTextBox x:Name="UserText" Height="200" DockPanel.Dock="Top"/>
+            <Button Content="check" Click="Button_Click"/>
         </DockPanel>
     </Viewbox>
 </Page>

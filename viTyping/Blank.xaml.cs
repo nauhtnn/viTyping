@@ -35,68 +35,17 @@ namespace viTyping
         {
             InitializeComponent();
         }
-
-        /*private void btnCheck_Click(object sender, RoutedEventArgs e)
-        {
-            {
-                TextRange r = new TextRange(tbxF1.Document.ContentStart,
-                        tbxF1.Document.ContentEnd);
-                //r.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.White);
-                r.ApplyPropertyValue(RichTextBox.ForegroundProperty, Brushes.Black);
-            }
-            string txt = new TextRange(tbxF1.Document.ContentStart, tbxF1.Document.ContentEnd).Text;
-            int HARD_IDX = 2;//hardcode
-            int len = Math.Min(txt.Length, txtF0.Text.Length) - HARD_IDX;
-            for (int i = 0; i < len; ++i)
-                if (txt[i] != txtF0.Text[i])
-                {
-                    TextRange r = new TextRange(tbxF1.Document.ContentStart.GetPositionAtOffset(i + HARD_IDX),
-                        tbxF1.Document.ContentStart.GetPositionAtOffset(i + HARD_IDX + 1));
-                    string x = r.Text;
-                    if (r.Text.CompareTo(" ") == 0 || r.Text.Length == 0)
-                        r.Text = "#";
-                    //r.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.Red);
-                    r.ApplyPropertyValue(RichTextBox.ForegroundProperty, Brushes.Red);
-                    return;
-                }
-            if (txt.Length < txtF0.Text.Length)
-            {
-                TextRange r = new TextRange(tbxF1.Document.ContentEnd,
-                        tbxF1.Document.ContentEnd);
-                r.Text = "#";
-                //r.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.Red);
-                r.ApplyPropertyValue(RichTextBox.ForegroundProperty, Brushes.Red);
-            }
-            else if(txt.Length < txtF0.Text.Length + 3)//hardcode
-            {
-				bRunning = false;
-				btnExit.IsEnabled = true;
-				tbxF1.IsEnabled = false;
-                MessageBox.Show("Bạn đã nhập văn bản đúng!", "Xin chúc mừng!");
-				btnCheck.Content = "10 điểm";
-            }
-            else
-            {
-                TextRange r = new TextRange(tbxF1.Document.ContentStart.GetPositionAtOffset(len + HARD_IDX),
-                        tbxF1.Document.ContentEnd);
-                string x = r.Text;
-                if (r.Text.CompareTo(" ") == 0 || r.Text.Length == 0)
-                    r.Text = "#";
-                //r.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.Red);
-                r.ApplyPropertyValue(RichTextBox.ForegroundProperty, Brushes.Red);
-            }
-        }*/
         private void btnCheck_Click(object sender, RoutedEventArgs e)
         {
             if(Grading().CompareTo("10") == 0)
             {
                 bRunning = false;
                 //btnExit.IsEnabled = true;
-                tbxF1.IsEnabled = false;
+                UserText.IsEnabled = false;
                 MessageBox.Show("Xin chúc mừng!", "Bạn đã nhập văn bản đúng!");
                 //btnCheck.Content = "10 điểm";
                 AppendGrade("10 điểm");
-                //System.IO.File.WriteAllText("f1.txt", tbxF1.Text);
+                //System.IO.File.WriteAllText("f1.txt", UserText.Text);
                 UpdateCurrentTestID();
                 SaveCurrentTestID();
                 ParseData(0, 0);
@@ -199,11 +148,20 @@ namespace viTyping
             RemainingTime = new TimeSpan(0, minute, second);
             txtRTime.Text = "" + RemainingTime.Minutes + " : " + RemainingTime.Seconds;
 
-            txtF0.Text = testConfigs[CFG.TEXT0.ToString()];
-            txtF0.FontSize = int.Parse(testConfigs[CFG.FONT_SIZE.ToString()]);
-            tbxF1.FontSize = txtF0.FontSize;
+            TargetText.Text = testConfigs[CFG.TEXT0.ToString()];
+            LineIdx0.FontSize = LineIdx1.FontSize = UserText.FontSize =
+                TargetText.FontSize = int.Parse(testConfigs[CFG.FONT_SIZE.ToString()]);
+            
 
-            if(File.Exists(TEST_FOLDER + testConfigs[CFG.PICTURE.ToString()]))
+            //count line
+            int n_lines = TargetText.Text.Count((char c) => { return c == '\n'; }) + 1;
+            StringBuilder line_idx = new StringBuilder();
+            for (int i = 1; i <= n_lines; ++i)
+                line_idx.Append(i.ToString() + "\n");
+            LineIdx0.Text = line_idx.ToString();
+            LineIdx1.Text = line_idx.ToString();
+
+            if (File.Exists(TEST_FOLDER + testConfigs[CFG.PICTURE.ToString()]))
             {
                 BitmapImage src = new BitmapImage();
                 src.BeginInit();
@@ -215,16 +173,16 @@ namespace viTyping
 
             TestDescription.Text = "Bài " + (CurrentTest + 1);
             
-            tbxF1.Text = "";
-            tbxF1.IsEnabled = true;
+            UserText.Text = "";
+            UserText.IsEnabled = true;
             bRunning = true;
 
             //if (File.Exists("f1.txt"))
             //{
-            //    //TextRange r = new TextRange(tbxF1.Document.ContentEnd,
-            //    //        tbxF1.Document.ContentEnd);
+            //    //TextRange r = new TextRange(UserText.Document.ContentEnd,
+            //    //        UserText.Document.ContentEnd);
             //    //r.Text = System.IO.File.ReadAllText("f1.txt");
-            //    tbxF1.Text = File.ReadAllText("f1.txt");
+            //    UserText.Text = File.ReadAllText("f1.txt");
             //}
         }
 
@@ -247,8 +205,8 @@ namespace viTyping
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            //System.IO.File.WriteAllText("f1.txt", new TextRange(tbxF1.Document.ContentStart, tbxF1.Document.ContentEnd).Text);
-            System.IO.File.WriteAllText("f1.txt", tbxF1.Text);
+            //System.IO.File.WriteAllText("f1.txt", new TextRange(UserText.Document.ContentStart, UserText.Document.ContentEnd).Text);
+            System.IO.File.WriteAllText("f1.txt", UserText.Text);
         }
 		
 		private void UpdateSrvrMsg(object source, System.Timers.ElapsedEventArgs e)
@@ -272,13 +230,13 @@ namespace viTyping
 					Dispatcher.Invoke(() =>
                     {
                         txtRTime.Text = RemainingTime.Minutes.ToString() + " : " + RemainingTime.Seconds;
-						tbxF1.IsEnabled = false;
+						UserText.IsEnabled = false;
 						MessageBox.Show("Bạn chưa nhập văn bản đúng theo mẫu!", "Hết giờ!");
                         //string txt = Grading() + " điểm";
                         //btnCheck.Content = txt;
 						//btnExit.IsEnabled = true;
                         //AppendGrade(txt);
-                        //System.IO.File.WriteAllText("f1.txt", tbxF1.Text);
+                        //System.IO.File.WriteAllText("f1.txt", UserText.Text);
                     });
                 }
             }
@@ -286,11 +244,11 @@ namespace viTyping
 		
 		private string Grading()
 		{
-            //string txt = new TextRange(tbxF1.Document.ContentStart, tbxF1.Document.ContentEnd).Text;
+            //string txt = new TextRange(UserText.Document.ContentStart, UserText.Document.ContentEnd).Text;
             char[] trimChars = { '\r', '\n', ' ', '\t' };
-            string txt = tbxF1.Text.Trim(trimChars);
-			int l = Levenshtein(txt, txtF0.Text);
-            return Math.Round(10.0f - 10.0f * l / txtF0.Text.Length, 1).ToString();
+            string txt = UserText.Text.Trim(trimChars);
+			int l = Levenshtein(txt, TargetText.Text);
+            return Math.Round(10.0f - 10.0f * l / TargetText.Text.Length, 1).ToString();
 		}
 		
 		public int Levenshtein(string s, string t)

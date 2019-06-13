@@ -8,24 +8,28 @@
       d:DesignHeight="720" d:DesignWidth="1280"
       ShowsNavigationUI="False">
     <Viewbox>
-        <DockPanel Loaded="Main_Loaded" Width="1280" Height="720">
+        <DockPanel Loaded="Main_Loaded" Width="1280" Height="720" Background="LightGray">
             <TextBlock x:Name="TestDescription" Background="#1c64e7" Foreground="#fff"
                        FontSize="28"
                        Height="80" DockPanel.Dock="Top" Width="1280"/>
-            <TextBlock x:Name="txtF0"
+            <TextBlock x:Name="LineIdx0" Height="620" Margin="10,10,0,0"
+                       Width="20" Background="LightGray" TextAlignment="Center"/>
+            <TextBox x:Name="UserText"
+                     Height="620" Margin="10,10,0,0"
+                     Width="360"
+                     TextWrapping="Wrap"
+                     AcceptsReturn="True" BorderThickness="0"/>
+            <TextBlock x:Name="LineIdx1" Height="620" Margin="10,10,0,0"
+                       Width="20" Background="LightGray" TextAlignment="Center"/>
+            <TextBlock x:Name="TargetText"
                        Height="620" Margin="10,10,0,0"
                        TextWrapping="Wrap"
                        Text="TextBlock"
-                       Width="490"
+                       Width="360"
                        TextAlignment="Left"/>
-            <TextBox x:Name="tbxF1"
-                     Height="620" Margin="10,10,0,0"
-                     Width="490"
-                     TextWrapping="Wrap"
-                     AcceptsReturn="True"/>
             <StackPanel>
                 <Image x:Name="TestPicture"
-                   Height="320" Margin="10,10,0,0" Width="260"/>
+                   Height="320" Margin="10,10,0,0" Width="440"/>
                 <TextBlock x:Name="txtRTime" Background="#ffffbb" Foreground="#00356b"
                        FontSize="28" TextAlignment="Center"
                        Text="0:0"
