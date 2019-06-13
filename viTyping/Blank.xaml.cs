@@ -142,6 +142,15 @@ namespace viTyping
 
                 pointer = pointer.GetNextContextPosition(LogicalDirection.Forward);
             }
+
+            if(s_i < s.Length)
+            {
+                TextRange range = new TextRange(document.ContentEnd,
+                                document.ContentEnd);
+                range.Text = "     ";
+                range.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.Blue);
+                formattedRanges.Add(range);
+            }
         }
 
         public SortedDictionary<string, string> LoadData()
