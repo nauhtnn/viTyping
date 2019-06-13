@@ -31,7 +31,8 @@ namespace viTyping
         {
             get { return TopicFolderPath + "sav.txt"; }
         }
-        static List<TextRange> formattedRanges = new List<TextRange>();
+
+        static TextRange HighlightRange = null;
 
         int CurrentTest = -1;
 		
@@ -41,7 +42,7 @@ namespace viTyping
         }
         private void btnCheck_Click(object sender, RoutedEventArgs e)
         {
-            if(!HighlightPlainTextDiff(UserText.Document, TargetText.Text.Replace("\n", "").ToCharArray()))
+            if(!HighlightPlainTextDiff(UserText.Document, TargetText.Text.Replace("\n", "").ToCharArray(), UserText))
             {
                 bRunning = false;
                 //btnExit.IsEnabled = true;
@@ -117,7 +118,7 @@ namespace viTyping
             return i;
         }
 
-        private static bool HighlightPlainTextDiff(FlowDocument document, char[] s)
+        private static bool HighlightPlainTextDiff(FlowDocument document, char[] s, RichTextBox rtb)
         {
             //Console.WriteLine("-----------------------");
             int s_i = 0;
@@ -137,10 +138,9 @@ namespace viTyping
                         if (textRun[i] != s[s_i])
                         {
                             int unmatching_word = SearchUnmatchingWord(textRun, i);
-                            TextRange range = new TextRange(pointer.GetPositionAtOffset(i),
+                            rtb.Selection.Select(pointer.GetPositionAtOffset(i),
                                 pointer.GetPositionAtOffset(unmatching_word));
-                            range.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.Red);
-                            formattedRanges.Add(range);
+                            rtb.Focus();
                             return true;
                         }
                     }
@@ -152,10 +152,12 @@ namespace viTyping
                 else if(context == TextPointerContext.ElementEnd && IsBlankLine)
                 {
                     pointer.InsertTextInRun("     ");
-                    TextRange range = new TextRange(pointer.Paragraph.ElementStart,
+                    HighlightRange = new TextRange(pointer.Paragraph.ElementStart,
                                 pointer.Paragraph.ElementEnd);
-                    range.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.Red);
-                    formattedRanges.Add(range);
+                    HighlightRange.ApplyPropertyValue(TextElement.BackgroundProperty,
+                        Brushes.Gray); //new SolidColorBrush(SysColor));
+                    //rtb.Selection.Select(HighlightRange.Start, HighlightRange.End);
+                    //rtb.Focus();
                     return true;
                 }
 
@@ -164,11 +166,13 @@ namespace viTyping
 
             if(s_i < s.Length)
             {
-                TextRange range = new TextRange(document.ContentEnd,
+                HighlightRange = new TextRange(document.ContentEnd,
                                 document.ContentEnd);
-                range.Text = "     ";
-                range.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.Red);
-                formattedRanges.Add(range);
+                HighlightRange.Text = "     ";
+                HighlightRange.ApplyPropertyValue(TextElement.BackgroundProperty,
+                    Brushes.Gray);//new SolidColorBrush(SysColor));
+                //rtb.Selection.Select(HighlightRange.Start, HighlightRange.End);
+                //rtb.Focus();
                 return true;
             }
             return false;
@@ -253,14 +257,6 @@ namespace viTyping
             UserText.Document.Blocks.Clear();
             UserText.IsEnabled = true;
             bRunning = true;
-
-            //if (File.Exists("f1.txt"))
-            //{
-            //    //TextRange r = new TextRange(UserText.Document.ContentEnd,
-            //    //        UserText.Document.ContentEnd);
-            //    //r.Text = System.IO.File.ReadAllText("f1.txt");
-            //    UserText.Text = File.ReadAllText("f1.txt");
-            //}
         }
 
         private void Main_Loaded(object sender, RoutedEventArgs e)
@@ -369,13 +365,8 @@ namespace viTyping
 
         private void UserText_GotFocus(object sender, RoutedEventArgs e)
         {
-            //foreach(TextRange i in formattedRanges)
-            //{
-            //    i.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.White);
-            //    if (i.Text == "     ")
-            //        i.Text = "";
-            //}
-            //formattedRanges.Clear();
+            if(HighlightRange != null)
+                HighlightRange.Text = "";
         }
     }
 }
