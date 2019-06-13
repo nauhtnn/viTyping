@@ -101,12 +101,17 @@ namespace viTyping
 
         public static void HighlightPlainTextDiff(FlowDocument document, char[] s)
         {
+            //Console.WriteLine("-----------------------");
             int s_i = 0;
             TextPointer pointer = document.ContentStart;
+            bool IsBlankLine = false;
             while (pointer != null)
             {
-                if (pointer.GetPointerContext(LogicalDirection.Forward) == TextPointerContext.Text)
+                //Console.WriteLine(pointer.GetPointerContext(LogicalDirection.Forward));
+                TextPointerContext context = pointer.GetPointerContext(LogicalDirection.Forward);
+                if (context == TextPointerContext.Text)
                 {
+                    IsBlankLine = false;
                     char[] textRun = pointer.GetTextInRun(LogicalDirection.Forward).ToCharArray();
                     int i = 0;
                     for (; i < textRun.Length && s_i < s.Length; ++i, ++s_i)
@@ -120,6 +125,19 @@ namespace viTyping
                             return;
                         }
                     }
+                }
+                else if(context == TextPointerContext.ElementStart)
+                {
+                    IsBlankLine = true;
+                }
+                else if(context == TextPointerContext.ElementEnd && IsBlankLine)
+                {
+                    pointer.InsertTextInRun("     ");
+                    TextRange range = new TextRange(pointer.Paragraph.ElementStart,
+                                pointer.Paragraph.ElementEnd);
+                    range.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.Blue);
+                    formattedRanges.Add(range);
+                    return;
                 }
 
                 pointer = pointer.GetNextContextPosition(LogicalDirection.Forward);
@@ -322,7 +340,11 @@ namespace viTyping
         private void UserText_GotFocus(object sender, RoutedEventArgs e)
         {
             foreach(TextRange i in formattedRanges)
+            {
                 i.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.White);
+                if (i.Text == "     ")
+                    i.Text = "";
+            }
             formattedRanges.Clear();
         }
     }
