@@ -20,5 +20,6 @@
 		<TextBox x:Name="substr" Text="input" TextWrapping="Wrap" Width="800" Height="40"/>
 		<TextBlock x:Name="rsubstr" Text="output" TextWrapping="Wrap" Width="800" Height="40"/>
 		<Button Content="subs" Click="Button_Click_2" Height="20"/>
+        <Button Content="close" Click="Button_Click_1" Height="20"/>
     </StackPanel>
 </Window>

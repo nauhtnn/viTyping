@@ -22,7 +22,8 @@ namespace WordTest
     /// </summary>
     public partial class MainWindow : System.Windows.Window
     {
-        Microsoft.Office.Interop.Word.Application mWordApp;
+        Microsoft.Office.Interop.Word.Application WorkingApp;
+        Microsoft.Office.Interop.Word.Application ModelApp;
         Document mDoc;
         Dictionary<int, string> vReq1;
         Dictionary<int, string> vReq2;
@@ -36,7 +37,7 @@ namespace WordTest
         {
             try
             {
-                mWordApp.Quit();
+                WorkingApp.Quit();
             }
             catch (System.Runtime.InteropServices.COMException ex) { }
         }
@@ -138,21 +139,28 @@ namespace WordTest
         {
             try
             {
+                mDoc.Saved = true;
                 mDoc.Close();
             }
-            catch(NullReferenceException ex) { }
+            catch(NullReferenceException e0) { }
+            catch(System.Runtime.InteropServices.COMException e1) { }
+            Close();
         }
 
         private void Main_Loaded(object sender, RoutedEventArgs e)
         {
-			var desktopWorkingArea = System.Windows.SystemParameters.WorkArea;
-			this.Left = 0;
-			this.Top = desktopWorkingArea.Bottom - this.Height;
-			this.Width = desktopWorkingArea.Width;
+			var desktopWorkingArea = SystemParameters.WorkArea;
+			Left = 0;
+			Top = desktopWorkingArea.Bottom - Height;
+			Width = desktopWorkingArea.Width;
 			
             // Open a doc file.
-            mWordApp = new Microsoft.Office.Interop.Word.Application();
-            mWordApp.Visible = true;
+            WorkingApp = new Microsoft.Office.Interop.Word.Application();
+            WorkingApp.Top = 0;;
+            WorkingApp.Height = (int)desktopWorkingArea.Bottom / 2;
+            WorkingApp.Width = (int)desktopWorkingArea.Width / 2;
+            WorkingApp.Left = 0;
+            WorkingApp.Visible = true;
 
 			string cur_dir = System.IO.Directory.GetCurrentDirectory();
             fName.Text = cur_dir + "/wordtest.docx";
@@ -172,7 +180,7 @@ namespace WordTest
 			
 			try
             {
-                mDoc = mWordApp.Documents.Open(fName.Text, ReadOnly: false);
+                mDoc = WorkingApp.Documents.Open(fName.Text, ReadOnly: false);
             }
             catch (System.Runtime.InteropServices.COMException ex)
             {
