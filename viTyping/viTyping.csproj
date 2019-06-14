@@ -82,7 +82,6 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ProblemLoader.cs" />
     <Compile Include="TopicSelection.xaml.cs">
       <DependentUpon>TopicSelection.xaml</DependentUpon>
     </Compile>
@@ -96,7 +95,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CFG.cs" />
     <Compile Include="Blank.xaml.cs">
       <DependentUpon>Blank.xaml</DependentUpon>
     </Compile>
@@ -124,6 +122,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="ProfileLibrary\ProfileLibrary.csproj">
+      <Project>{7ebf1075-44d2-4b81-bf6b-bd82004c7e61}</Project>
+      <Name>ProfileLibrary</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

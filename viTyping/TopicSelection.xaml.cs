@@ -77,7 +77,7 @@ namespace viTyping
         {
             Button b = sender as Button;
             Page1 p = new Page1();
-            p.TopicFolderPath = Directory.GetCurrentDirectory() + "\\" + b.Content.ToString().ToLower() + "\\";
+            p.profile.SetPath(Directory.GetCurrentDirectory() + "\\" + b.Content.ToString().ToLower() + "\\");
             NavigationService.Navigate(p, UriKind.Relative);
         }
     }

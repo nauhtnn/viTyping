@@ -13,29 +13,34 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.IO;
+using ProfileLibrary;
 
 namespace viTyping
 {
+    enum PLAIN_PROBLEM_FORMAT
+    {
+        DURATION_MINUTE,
+        DURATION_SECOND,
+        FONT_SIZE,
+        PICTURE,
+        TEXT0,
+        TEXT1
+    };
+
     /// <summary>
     /// Interaction logic for Page1.xaml
     /// </summary>
-    public partial class Page1: Page, ProblemLoader
+    public partial class Page1: Page
     {
 		DateTime StartTime;
 		TimeSpan TestDuration;
         TimeSpan RemainingTime;
 		System.Timers.Timer mTimer;
 		bool bRunning = true;
-        public string TopicFolderPath;
-        string ProgressFilePath
-        {
-            get { return TopicFolderPath + "sav.txt"; }
-        }
-
         static TextRange HighlightRange = null;
+        
+        public Profile profile = new Profile();
 
-        int CurrentTest = -1;
-		
         public Page1()
         {
             InitializeComponent();
@@ -51,9 +56,9 @@ namespace viTyping
                 //btnCheck.Content = "10 điểm";
                 AppendGrade("10 điểm");
                 //System.IO.File.WriteAllText("f1.txt", UserText.Text);
-                UpdateCurrentTestID();
-                SaveCurrentTestID();
-                ParseData(0, 0);
+                profile.NextProblem();
+                profile.Save();
+                ParseProblem(LoadProblem());
             }
             else
             {
@@ -80,26 +85,6 @@ namespace viTyping
             mTimer.Elapsed += UpdateSrvrMsg;
             mTimer.AutoReset = true;
             mTimer.Enabled = true;
-        }
-
-        private void SaveCurrentTestID()
-        {
-            if (CurrentTest < 0)
-                CurrentTest = 0;
-            File.WriteAllText(ProgressFilePath, CurrentTest.ToString());
-        }
-
-        private void UpdateCurrentTestID()
-        {
-            if (CurrentTest < 0)
-            {
-                if (File.Exists(ProgressFilePath))
-                    CurrentTest = int.Parse(File.ReadAllText(ProgressFilePath));
-                else
-                    CurrentTest = 0;
-            }
-            else
-                ++CurrentTest;
         }
 
         private static int SearchUnmatchingWord(char[] text, int i)
@@ -178,60 +163,62 @@ namespace viTyping
             return false;
         }
 
-        public SortedDictionary<string, string> LoadData()
+        public SortedDictionary<string, string> LoadProblem()
         {
-            if(File.Exists(ProgressFilePath))
-                CurrentTest = int.Parse(File.ReadAllText(ProgressFilePath));
+            SortedDictionary<string, string> data = new SortedDictionary<string, string>();
 
-            if (CurrentTest < 0)
-                CurrentTest = 0;
-
-            string testPath = TopicFolderPath + CurrentTest + ".txt";
-
-            SortedDictionary<string, string> testConfigs = new SortedDictionary<string, string>();
-
-            if (File.Exists(testPath))
+            if (File.Exists(profile.CurrentProblemPath()))
             {
-                StringBuilder text = new StringBuilder();
-                foreach (string line in File.ReadAllLines(testPath))
+                StringBuilder text0 = new StringBuilder();
+                StringBuilder text1 = new StringBuilder();
+                bool isText0 = true;
+                foreach (string line in File.ReadAllLines(profile.CurrentProblemPath()))
                 {
                     string[] tokens = line.Split('\t');
                     if (tokens.Length == 2)
-                        testConfigs.Add(tokens[0], tokens[1]);
-                    else if(tokens.Length == 1)
+                        data.Add(tokens[0], tokens[1]);
+                    else if (tokens.Length == 1)
                     {
-                        text.Append(tokens[0] + "\n");
+                        if (tokens[0].Contains("<<<<>>>>"))
+                            isText0 = false;
+                        else if(isText0)
+                            text0.Append(tokens[0] + "\n");
+                        else
+                            text1.Append(tokens[0] + "\n");
                     }
                 }
                 char[] trimChars = { '\r', '\n', ' ', '\t' };
-                testConfigs.Add(CFG.TEXT0.ToString(), text.ToString().Trim(trimChars));
+                data.Add(PLAIN_PROBLEM_FORMAT.TEXT0.ToString(), text0.ToString().Trim(trimChars));
+                data.Add(PLAIN_PROBLEM_FORMAT.TEXT1.ToString(), text0.ToString().Trim(trimChars));
             }
-            if(!testConfigs.ContainsKey(CFG.DURATION_MINUTE.ToString()))
-                testConfigs.Add(CFG.DURATION_MINUTE.ToString(), "10");
-            if (!testConfigs.ContainsKey(CFG.DURATION_SECOND.ToString()))
-                testConfigs.Add(CFG.DURATION_SECOND.ToString(), "0");
-            if (!testConfigs.ContainsKey(CFG.PICTURE.ToString()))
-                testConfigs.Add(CFG.PICTURE.ToString(), "default_picture.png");
-            if (!testConfigs.ContainsKey(CFG.FONT_SIZE.ToString()))
-                testConfigs.Add(CFG.FONT_SIZE.ToString(), "14");
-            if (!testConfigs.ContainsKey(CFG.TEXT0.ToString()))
-                testConfigs.Add(CFG.TEXT0.ToString(), "asdfghjkl;");
-            return testConfigs;
+            if (!data.ContainsKey(PLAIN_PROBLEM_FORMAT.DURATION_MINUTE.ToString()))
+                data.Add(PLAIN_PROBLEM_FORMAT.DURATION_MINUTE.ToString(), "10");
+            if (!data.ContainsKey(PLAIN_PROBLEM_FORMAT.DURATION_SECOND.ToString()))
+                data.Add(PLAIN_PROBLEM_FORMAT.DURATION_SECOND.ToString(), "0");
+            if (!data.ContainsKey(PLAIN_PROBLEM_FORMAT.PICTURE.ToString()))
+                data.Add(PLAIN_PROBLEM_FORMAT.PICTURE.ToString(), "default_picture.png");
+            if (!data.ContainsKey(PLAIN_PROBLEM_FORMAT.FONT_SIZE.ToString()))
+                data.Add(PLAIN_PROBLEM_FORMAT.FONT_SIZE.ToString(), "14");
+            if (!data.ContainsKey(PLAIN_PROBLEM_FORMAT.TEXT0.ToString()))
+                data.Add(PLAIN_PROBLEM_FORMAT.TEXT0.ToString(), "asdfghjkl;");
+            if (!data.ContainsKey(PLAIN_PROBLEM_FORMAT.TEXT1.ToString()))
+                data.Add(PLAIN_PROBLEM_FORMAT.TEXT1.ToString(), "");
+            return data;
         }
 
-        public void ParseData(int level, int subID)
+        public void ParseProblem(SortedDictionary<string, string> data)
         {
-            SortedDictionary<string, string> testConfigs = LoadData();
+             data = LoadProblem();
 
-            int minute = int.Parse(testConfigs[CFG.DURATION_MINUTE.ToString()]);
-            int second = int.Parse(testConfigs[CFG.DURATION_SECOND.ToString()]);
+            int minute = int.Parse(data[PLAIN_PROBLEM_FORMAT.DURATION_MINUTE.ToString()]);
+            int second = int.Parse(data[PLAIN_PROBLEM_FORMAT.DURATION_SECOND.ToString()]);
             TestDuration = new TimeSpan(0, minute, second);
             RemainingTime = new TimeSpan(0, minute, second);
             txtRTime.Text = "" + RemainingTime.Minutes + " : " + RemainingTime.Seconds;
 
-            TargetText.Text = testConfigs[CFG.TEXT0.ToString()];
+            TargetText.Text = data[PLAIN_PROBLEM_FORMAT.TEXT0.ToString()];
             LineIdx0.FontSize = LineIdx1.FontSize = UserText.FontSize =
-                TargetText.FontSize = int.Parse(testConfigs[CFG.FONT_SIZE.ToString()]);
+                TargetText.FontSize = int.Parse(data[PLAIN_PROBLEM_FORMAT.FONT_SIZE.ToString()]);
             
 
             //count line
@@ -242,17 +229,17 @@ namespace viTyping
             LineIdx0.Text = line_idx.ToString();
             LineIdx1.Text = line_idx.ToString();
 
-            if (File.Exists(TopicFolderPath + testConfigs[CFG.PICTURE.ToString()]))
+            if (File.Exists(profile.FolderPath + data[PLAIN_PROBLEM_FORMAT.PICTURE.ToString()]))
             {
                 BitmapImage src = new BitmapImage();
                 src.BeginInit();
-                src.UriSource = new Uri(TopicFolderPath + testConfigs[CFG.PICTURE.ToString()], UriKind.Relative);
+                src.UriSource = new Uri(profile.FolderPath + data[PLAIN_PROBLEM_FORMAT.PICTURE.ToString()], UriKind.Relative);
                 src.CacheOption = BitmapCacheOption.OnLoad;
                 src.EndInit();
                 TestPicture.Source = src;
             }
 
-            TestDescription.Text = "Bài " + (CurrentTest + 1);
+            TestDescription.Text = "Bài " + (profile.CurrentProblemID + 1);
 
             UserText.Document.Blocks.Clear();
             UserText.IsEnabled = true;
@@ -266,7 +253,7 @@ namespace viTyping
             w.WindowState = WindowState.Maximized;
             w.ResizeMode = ResizeMode.NoResize;
 
-            ParseData(0,0);
+            ParseProblem(LoadProblem());
 
             InitTimer();
         }

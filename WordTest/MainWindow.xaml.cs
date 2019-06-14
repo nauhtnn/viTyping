@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Office.Interop.Word;
-
+using ProfileLibrary;
 
 namespace WordTest
 {
@@ -24,7 +24,8 @@ namespace WordTest
     {
         Microsoft.Office.Interop.Word.Application WorkingApp;
         Microsoft.Office.Interop.Word.Application ModelApp;
-        Document mDoc;
+        Document wDocument;
+        Document modelDocument;
         Dictionary<int, string> vReq1;
         Dictionary<int, string> vReq2;
 
@@ -44,11 +45,11 @@ namespace WordTest
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            if(mDoc == null)
+            if(wDocument == null)
 				return;
             int penalty = 0;
             int i = 0;
-            foreach (Microsoft.Office.Interop.Word.Paragraph p in mDoc.Paragraphs)
+            foreach (Microsoft.Office.Interop.Word.Paragraph p in wDocument.Paragraphs)
             {
                 string req;
                 if (vReq1.TryGetValue(i, out req))
@@ -139,60 +140,73 @@ namespace WordTest
         {
             try
             {
-                mDoc.Saved = true;
-                mDoc.Close();
+                wDocument.Saved = true;
+                wDocument.Close();
+                modelDocument.Close();
             }
-            catch(NullReferenceException e0) { }
-            catch(System.Runtime.InteropServices.COMException e1) { }
+            catch(NullReferenceException) { }
+            catch(System.Runtime.InteropServices.COMException) { }
             Close();
+        }
+
+        private Microsoft.Office.Interop.Word.Application OpenApp(int left, int height, int width)
+        {
+            Microsoft.Office.Interop.Word.Application app =
+                new Microsoft.Office.Interop.Word.Application();
+            app.Top = 0; ;
+
+            app.Height = height;
+            app.Width = width;
+            app.Left = left;
+            app.Visible = true;
+
+            return app;
+        }
+
+        private Document OpenDocument(string path, bool readOnly,
+            Microsoft.Office.Interop.Word.Application app)
+        {
+            Document doc;
+
+            try
+            {
+                doc = app.Documents.Open(path, ReadOnly: readOnly);
+            }
+            catch (System.Runtime.InteropServices.COMException ex)
+            {
+                //MessageBox.Show("Cannot open document!" + ex.ToString());
+                doc = null;
+            }
+            return doc;
         }
 
         private void Main_Loaded(object sender, RoutedEventArgs e)
         {
-			var desktopWorkingArea = SystemParameters.WorkArea;
+			var area = SystemParameters.WorkArea;
 			Left = 0;
-			Top = desktopWorkingArea.Bottom - Height;
-			Width = desktopWorkingArea.Width;
-			
-            // Open a doc file.
-            WorkingApp = new Microsoft.Office.Interop.Word.Application();
-            WorkingApp.Top = 0;;
-            WorkingApp.Height = (int)desktopWorkingArea.Bottom / 2;
-            WorkingApp.Width = (int)desktopWorkingArea.Width / 2;
-            WorkingApp.Left = 0;
-            WorkingApp.Visible = true;
+			Top = area.Bottom - Height;
+			Width = area.Width;
 
-			string cur_dir = System.IO.Directory.GetCurrentDirectory();
-            fName.Text = cur_dir + "/wordtest.docx";
-            fReq.Text = cur_dir + "/wordtest.txt";
-			
-			if(System.IO.File.Exists(cur_dir + "/sam.txt"))
-			{
-				string sam_file = System.IO.File.ReadAllText(cur_dir + "/sam.txt");
-				output.Text += sam_file;
-			}
-
-            vReq1 = new Dictionary<int, string>();
-            vReq2 = new Dictionary<int, string>();
-            LoadRequirement(fReq.Text);
+            //vReq1 = new Dictionary<int, string>();
+            //vReq2 = new Dictionary<int, string>();
+            //LoadRequirement(fReq.Text);
 
             GetWindow(this).Closing += MainWindow_Closing;
-			
-			try
-            {
-                mDoc = WorkingApp.Documents.Open(fName.Text, ReadOnly: false);
-            }
-            catch (System.Runtime.InteropServices.COMException ex)
-            {
-                MessageBox.Show("Cannot open document!" + ex.ToString());
-                mDoc = null;
-            }
-			
+
+            string curPath = System.IO.Directory.GetCurrentDirectory();
+
+            //open apps
+            WorkingApp = OpenApp(0, (int)area.Height / 2, (int)area.Width / 3);
+            ModelApp = OpenApp((int)area.Width / 3, (int)area.Height / 2, (int)area.Width / 3);
+
+            // Open documents
+            wDocument = OpenDocument(curPath + "\\0.docx", false, WorkingApp);
+            modelDocument = OpenDocument(curPath + "\\0_model.docx", true, ModelApp);
         }
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            foreach (Microsoft.Office.Interop.Word.Paragraph p in mDoc.Paragraphs)
+            foreach (Microsoft.Office.Interop.Word.Paragraph p in wDocument.Paragraphs)
 			{
 				int i = p.Range.Text.IndexOf(substr.Text);
 				if(-1 < i)
