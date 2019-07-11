@@ -124,7 +124,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="ProfileLibrary\ProfileLibrary.csproj">
+    <ProjectReference Include="..\ProfileLibrary\ProfileLibrary.csproj">
       <Project>{7ebf1075-44d2-4b81-bf6b-bd82004c7e61}</Project>
       <Name>ProfileLibrary</Name>
     </ProjectReference>

@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Office.Interop.Word;
-using ProfileLibrary;
+//using ProfileLibrary;
 
 namespace WordTest
 {
@@ -153,12 +153,12 @@ namespace WordTest
         {
             Microsoft.Office.Interop.Word.Application app =
                 new Microsoft.Office.Interop.Word.Application();
+            app.Visible = true;
+            app.WindowState = WdWindowState.wdWindowStateNormal;
             app.Top = 0; ;
-
             app.Height = height;
             app.Width = width;
             app.Left = left;
-            app.Visible = true;
 
             return app;
         }
@@ -196,8 +196,8 @@ namespace WordTest
             string curPath = System.IO.Directory.GetCurrentDirectory();
 
             //open apps
-            WorkingApp = OpenApp(0, (int)area.Height / 2, (int)area.Width / 3);
-            ModelApp = OpenApp((int)area.Width / 3, (int)area.Height / 2, (int)area.Width / 3);
+            WorkingApp = OpenApp(0, (int)area.Height / 2, (int)area.Width / 2);
+            ModelApp = OpenApp((int)area.Width / 2, (int)area.Height / 2, (int)area.Width / 2);
 
             // Open documents
             wDocument = OpenDocument(curPath + "\\0.docx", false, WorkingApp);
