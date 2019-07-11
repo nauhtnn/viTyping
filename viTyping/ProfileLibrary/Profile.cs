@@ -18,6 +18,7 @@ namespace ProfileLibrary
         public Profile()
         {
             CurrentProblemID = -1;
+            FolderPath = null;
         }
 
         public void SetPath(string path)

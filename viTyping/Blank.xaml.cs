@@ -19,6 +19,7 @@ namespace viTyping
 {
     enum PLAIN_PROBLEM_FORMAT
     {
+        PROBLEM_DESC,
         DURATION_MINUTE,
         DURATION_SECOND,
         FONT_SIZE,
@@ -189,7 +190,7 @@ namespace viTyping
                 }
                 char[] trimChars = { '\r', '\n', ' ', '\t' };
                 data.Add(PLAIN_PROBLEM_FORMAT.TEXT0.ToString(), text0.ToString().Trim(trimChars));
-                data.Add(PLAIN_PROBLEM_FORMAT.TEXT1.ToString(), text0.ToString().Trim(trimChars));
+                data.Add(PLAIN_PROBLEM_FORMAT.TEXT1.ToString(), text1.ToString().Trim(trimChars));
             }
             if (!data.ContainsKey(PLAIN_PROBLEM_FORMAT.DURATION_MINUTE.ToString()))
                 data.Add(PLAIN_PROBLEM_FORMAT.DURATION_MINUTE.ToString(), "10");
@@ -216,10 +217,16 @@ namespace viTyping
             RemainingTime = new TimeSpan(0, minute, second);
             txtRTime.Text = "" + RemainingTime.Minutes + " : " + RemainingTime.Seconds;
 
+            TestDescription.Text = "\tBài " + (profile.CurrentProblemID + 1) + ": " +
+                data[PLAIN_PROBLEM_FORMAT.PROBLEM_DESC.ToString()];
+
+            UserText.Document.Blocks.Clear();
+            UserText.Document.ContentStart.InsertTextInRun(data[PLAIN_PROBLEM_FORMAT.TEXT1.ToString()]);
+            UserText.IsEnabled = true;
+
             TargetText.Text = data[PLAIN_PROBLEM_FORMAT.TEXT0.ToString()];
             LineIdx0.FontSize = LineIdx1.FontSize = UserText.FontSize =
                 TargetText.FontSize = int.Parse(data[PLAIN_PROBLEM_FORMAT.FONT_SIZE.ToString()]);
-            
 
             //count line
             int n_lines = TargetText.Text.Count((char c) => { return c == '\n'; }) + 1;
@@ -239,10 +246,6 @@ namespace viTyping
                 TestPicture.Source = src;
             }
 
-            TestDescription.Text = "Bài " + (profile.CurrentProblemID + 1);
-
-            UserText.Document.Blocks.Clear();
-            UserText.IsEnabled = true;
             bRunning = true;
         }
 
@@ -252,6 +255,9 @@ namespace viTyping
             w.WindowStyle = WindowStyle.None;
             w.WindowState = WindowState.Maximized;
             w.ResizeMode = ResizeMode.NoResize;
+
+            if (profile.FolderPath == null)
+                profile.SetPath(Directory.GetCurrentDirectory() + "\\" + "plain\\");
 
             ParseProblem(LoadProblem());
 
