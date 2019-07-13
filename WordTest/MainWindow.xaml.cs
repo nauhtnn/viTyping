@@ -58,32 +58,21 @@ namespace WordTest
         {
             if(workingDoc == null)
 				return;
-            int penalty = 0;
-            int i = 0;
-            foreach (Microsoft.Office.Interop.Word.Paragraph p in workingDoc.Paragraphs)
+            if(workingDoc.Paragraphs.Count != modelDoc.Paragraphs.Count)
             {
-                string req;
-                if (vReq1.TryGetValue(i, out req))
-                {
-                    if(!MatchFontRequirement(p.Range, req))
-                        ++penalty;
-                }
-                else if(!MatchNoFormatFont(p.Range))
-                    ++penalty;
-                if (vReq2.TryGetValue(i, out req))
-                {
-                    if (!MatchAlignRequirement(p, req))
-                        ++penalty;
-                }
-                else if(!MatchNoFormatAlign(p))
-                    ++penalty;
-                ////output.Text += "b " + p.Range.Font.Bold.ToString() +
-                //    "i " + p.Range.Font.Italic.ToString() +
-                //    "u " + p.Range.Font.Underline.ToString() + "\n";
-                //if(vReq2)
-                //  ++penalty;
-                ++i;
+                MessageBox.Show("Khác số lượng đoạn văn.");
+                return;
             }
+            Queue<Microsoft.Office.Interop.Word.Paragraph> workingParagraphs =
+                new Queue<Microsoft.Office.Interop.Word.Paragraph>();
+            foreach (Microsoft.Office.Interop.Word.Paragraph p in workingDoc.Paragraphs)
+                workingParagraphs.Enqueue(p);
+            Queue<Microsoft.Office.Interop.Word.Paragraph> modelParagraphs =
+                new Queue<Microsoft.Office.Interop.Word.Paragraph>();
+            foreach (Microsoft.Office.Interop.Word.Paragraph p in modelDoc.Paragraphs)
+                modelParagraphs.Enqueue(p);
+
+            //MessageBox.Show("Xin chúc mừng!");
         }
 
         private bool MatchAlignRequirement(Microsoft.Office.Interop.Word.Paragraph p, string req)
