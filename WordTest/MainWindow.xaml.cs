@@ -22,10 +22,10 @@ namespace WordTest
     /// </summary>
     public partial class MainWindow : System.Windows.Window
     {
-        Microsoft.Office.Interop.Word.Application WorkingApp;
-        Microsoft.Office.Interop.Word.Application ModelApp;
-        Document wDocument;
-        Document modelDocument;
+        Microsoft.Office.Interop.Word.Application workingApp;
+        Microsoft.Office.Interop.Word.Application modelApp;
+        Document workingDoc;
+        Document modelDoc;
         Dictionary<int, string> vReq1;
         Dictionary<int, string> vReq2;
 
@@ -36,20 +36,31 @@ namespace WordTest
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            QuitWordApps();
+        }
+
+        private void QuitWordApps()
+        {
             try
             {
-                WorkingApp.Quit();
+                workingDoc.Saved = true;
+                workingDoc.Close();
+                modelDoc.Saved = true;
+                modelDoc.Close();
+                workingApp.Quit();
+                modelApp.Quit();
             }
-            catch (System.Runtime.InteropServices.COMException ex) { }
+            catch (NullReferenceException) { }
+            catch (System.Runtime.InteropServices.COMException) { }
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            if(wDocument == null)
+            if(workingDoc == null)
 				return;
             int penalty = 0;
             int i = 0;
-            foreach (Microsoft.Office.Interop.Word.Paragraph p in wDocument.Paragraphs)
+            foreach (Microsoft.Office.Interop.Word.Paragraph p in workingDoc.Paragraphs)
             {
                 string req;
                 if (vReq1.TryGetValue(i, out req))
@@ -138,43 +149,43 @@ namespace WordTest
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                wDocument.Saved = true;
-                wDocument.Close();
-                modelDocument.Close();
-            }
-            catch(NullReferenceException) { }
-            catch(System.Runtime.InteropServices.COMException) { }
+            QuitWordApps();
             Close();
         }
 
-        private Microsoft.Office.Interop.Word.Application OpenApp(int left, int height, int width)
+        private Microsoft.Office.Interop.Word.Application OpenApp(bool isModel)
         {
-            Microsoft.Office.Interop.Word.Application app =
-                new Microsoft.Office.Interop.Word.Application();
-            app.Visible = true;
-            app.WindowState = WdWindowState.wdWindowStateNormal;
-            app.Top = 0; ;
-            app.Height = height;
-            app.Width = width;
-            app.Left = left;
-
+            Microsoft.Office.Interop.Word.Application app;
+            try
+            {
+                app = new Microsoft.Office.Interop.Word.Application();
+                app.Visible = true;
+                app.WindowState = WdWindowState.wdWindowStateNormal;
+                int w = app.UsableWidth;
+                app.Top = 0;
+                app.Height = app.UsableHeight / 2;
+                app.Width = app.UsableWidth / 2;
+                app.Left = (isModel) ? app.Width : 0;
+            }
+            catch (System.Runtime.InteropServices.COMException ex)
+            {
+                MessageBox.Show("Cannot open app!" + ex.ToString());
+                app = null;
+            }
             return app;
         }
 
-        private Document OpenDocument(string path, bool readOnly,
-            Microsoft.Office.Interop.Word.Application app)
+        private Document OpenDocument(string path, Microsoft.Office.Interop.Word.Application app)
         {
             Document doc;
 
             try
             {
-                doc = app.Documents.Open(path, ReadOnly: readOnly);
+                doc = app.Documents.Open(path, ReadOnly: app == modelApp);
             }
             catch (System.Runtime.InteropServices.COMException ex)
             {
-                //MessageBox.Show("Cannot open document!" + ex.ToString());
+                MessageBox.Show("Cannot open document!" + ex.ToString());
                 doc = null;
             }
             return doc;
@@ -193,20 +204,19 @@ namespace WordTest
 
             GetWindow(this).Closing += MainWindow_Closing;
 
+            workingApp = OpenApp(false);
+            modelApp = OpenApp(true);
+
             string curPath = System.IO.Directory.GetCurrentDirectory();
 
-            //open apps
-            WorkingApp = OpenApp(0, (int)area.Height / 2, (int)area.Width / 2);
-            ModelApp = OpenApp((int)area.Width / 2, (int)area.Height / 2, (int)area.Width / 2);
-
             // Open documents
-            wDocument = OpenDocument(curPath + "\\0.docx", false, WorkingApp);
-            modelDocument = OpenDocument(curPath + "\\0_model.docx", true, ModelApp);
+            workingDoc = OpenDocument(curPath + "\\0.docx", workingApp);
+            modelDoc = OpenDocument(curPath + "\\0_model.docx", modelApp);
         }
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            foreach (Microsoft.Office.Interop.Word.Paragraph p in wDocument.Paragraphs)
+            foreach (Microsoft.Office.Interop.Word.Paragraph p in workingDoc.Paragraphs)
 			{
 				int i = p.Range.Text.IndexOf(substr.Text);
 				if(-1 < i)
