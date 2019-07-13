@@ -8,18 +8,13 @@
         Title="MainWindow"
 		Topmost="True"
 		WindowStyle="None"
-		ResizeMode="NoResize"
-		Height="200">
-    <StackPanel Loaded="Main_Loaded">
-        <Button Content="Chấm điểm" Click="Button_Click" FontSize="18"/>
-        <TextBox Visibility="Collapsed" x:Name="fName" Text="document name" TextWrapping="Wrap" />
-        <TextBlock x:Name="output" TextWrapping="Wrap"
-			Text="Hãy định dạng văn bản theo mẫu" FontSize="18" />
-        <TextBox Visibility="Collapsed" x:Name="fReq" Text="requirement file" TextWrapping="Wrap" />
-        <TextBlock x:Name="txtPenalty" Visibility="Collapsed" TextWrapping="Wrap" FontSize="32" />
-		<TextBox x:Name="substr" Text="input" TextWrapping="Wrap" Width="800" Height="40"/>
-		<TextBlock x:Name="rsubstr" Text="output" TextWrapping="Wrap" Width="800" Height="40"/>
-		<Button Content="subs" Click="Button_Click_2" Height="20"/>
-        <Button Content="close" Click="Button_Click_1" Height="20"/>
-    </StackPanel>
+        d:DesignHeight="720" d:DesignWidth="1280"
+		Height="80">
+    <DockPanel x:Name="MainApp" Loaded="Main_Loaded" Width="1280" Initialized="MainApp_Initialized" Margin="0">
+        <TextBlock x:Name="ProblemDesc" Background="#1c64e7" Foreground="#fff"
+                       FontSize="28"
+                       Height="80" DockPanel.Dock="Left"  Width="960" Margin="0" Padding="0"/>
+        <Button x:Name="CheckBtn" Content="Kiểm tra" Width="160" Click="Button_Click" FontSize="24" Foreground="White" Background="Green" Margin="0" Padding="0"/>
+        <Button x:Name="ExitBtn" Content="Thoát" Width="160" Click="Button_Click_1" FontSize="24" Foreground="White" Background="OrangeRed" Margin="0" Padding="0"/>
+    </DockPanel>
 </Window>

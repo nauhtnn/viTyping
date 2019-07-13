@@ -84,7 +84,6 @@ namespace WordTest
                 //  ++penalty;
                 ++i;
             }
-            txtPenalty.Text = Math.Round(10 - (float) penalty / i * 10, 1).ToString() + " điểm";
         }
 
         private bool MatchAlignRequirement(Microsoft.Office.Interop.Word.Paragraph p, string req)
@@ -153,7 +152,7 @@ namespace WordTest
             Close();
         }
 
-        private Microsoft.Office.Interop.Word.Application OpenApp(bool isModel)
+        private Microsoft.Office.Interop.Word.Application OpenWordApp(bool isModel)
         {
             Microsoft.Office.Interop.Word.Application app;
             try
@@ -162,10 +161,18 @@ namespace WordTest
                 app.Visible = true;
                 app.WindowState = WdWindowState.wdWindowStateNormal;
                 int w = app.UsableWidth;
-                app.Top = 0;
-                app.Height = app.UsableHeight / 2;
-                app.Width = app.UsableWidth / 2;
-                app.Left = (isModel) ? app.Width : 0;
+                app.Top = app.UsableHeight / 9;
+                app.Height = app.UsableHeight * 8 / 9;
+                if(isModel)
+                {
+                    app.Width = app.UsableWidth / 3;
+                    app.Left = app.Width * 2;
+                }
+                else
+                {
+                    app.Width = app.UsableWidth * 2 / 3;
+                    app.Left = 0;
+                }
             }
             catch (System.Runtime.InteropServices.COMException ex)
             {
@@ -191,12 +198,27 @@ namespace WordTest
             return doc;
         }
 
+        private void ScaleGUI()
+        {
+            var area = SystemParameters.WorkArea;
+            double scale = area.Width / MainApp.Width;
+            MainApp.Width = area.Width;
+            ProblemDesc.FontSize = ProblemDesc.FontSize * scale;
+            ProblemDesc.Width = ProblemDesc.Width * scale;
+            CheckBtn.FontSize = CheckBtn.FontSize * scale;
+            CheckBtn.Width = CheckBtn.Width * scale;
+            ExitBtn.FontSize = ExitBtn.FontSize * scale;
+            ExitBtn.Width = ExitBtn.Width * scale;
+
+            System.Windows.Window.GetWindow(this).Width = area.Width;
+        }
+
         private void Main_Loaded(object sender, RoutedEventArgs e)
         {
-			var area = SystemParameters.WorkArea;
 			Left = 0;
-			Top = area.Bottom - Height;
-			Width = area.Width;
+            Top = 0;
+
+            ScaleGUI();
 
             //vReq1 = new Dictionary<int, string>();
             //vReq2 = new Dictionary<int, string>();
@@ -204,30 +226,15 @@ namespace WordTest
 
             GetWindow(this).Closing += MainWindow_Closing;
 
-            workingApp = OpenApp(false);
-            modelApp = OpenApp(true);
+            
+            modelApp = OpenWordApp(true);
+            workingApp = OpenWordApp(false);
 
             string curPath = System.IO.Directory.GetCurrentDirectory();
 
             // Open documents
-            workingDoc = OpenDocument(curPath + "\\0.docx", workingApp);
             modelDoc = OpenDocument(curPath + "\\0_model.docx", modelApp);
-        }
-
-        private void Button_Click_2(object sender, RoutedEventArgs e)
-        {
-            foreach (Microsoft.Office.Interop.Word.Paragraph p in workingDoc.Paragraphs)
-			{
-				int i = p.Range.Text.IndexOf(substr.Text);
-				if(-1 < i)
-				{
-					Range r = p.Range;
-					r.Start = p.Range.Start + i;
-					r.End = r.Start + substr.Text.Length;
-					rsubstr.Text = r.Text;
-					break;
-				}
-			}
+            workingDoc = OpenDocument(curPath + "\\0.docx", workingApp);
         }
 
         private void LoadRequirement(string fname)
@@ -271,5 +278,7 @@ namespace WordTest
                     return false;
             return true;
         }
+
+        private void MainApp_Initialized(object sender, EventArgs e) => ScaleGUI();
     }
 }
