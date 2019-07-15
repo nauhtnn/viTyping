@@ -58,10 +58,15 @@ namespace WordTest
         {
             if(workingDoc == null)
 				return;
-            if(workingDoc.Paragraphs.Count != modelDoc.Paragraphs.Count)
+            MatchAlignment();
+        }
+
+        private bool MatchAlignment()
+        {
+            if (workingDoc.Paragraphs.Count != modelDoc.Paragraphs.Count)
             {
                 MessageBox.Show("Khác số lượng đoạn văn.");
-                return;
+                return false;
             }
             Queue<Microsoft.Office.Interop.Word.Paragraph> workingParagraphs =
                 new Queue<Microsoft.Office.Interop.Word.Paragraph>();
@@ -71,30 +76,17 @@ namespace WordTest
                 new Queue<Microsoft.Office.Interop.Word.Paragraph>();
             foreach (Microsoft.Office.Interop.Word.Paragraph p in modelDoc.Paragraphs)
                 modelParagraphs.Enqueue(p);
+            int i = 0;
+            while(workingParagraphs.Count() > 0)
+            {
+                if(workingParagraphs.Dequeue().Alignment != modelParagraphs.Dequeue().Alignment)
+                {
+                    MessageBox.Show("Unmatched alignment at line " + i);
+                    return false;
+                }
+                ++i;
+            }
 
-            //MessageBox.Show("Xin chúc mừng!");
-        }
-
-        private bool MatchAlignRequirement(Microsoft.Office.Interop.Word.Paragraph p, string req)
-        {
-            if ((req.Contains("l") && p.Alignment != WdParagraphAlignment.wdAlignParagraphLeft) ||
-                    !req.Contains("l") && p.Alignment == WdParagraphAlignment.wdAlignParagraphLeft)
-            {
-                //output.Text += "error para_" + p.Range.Text + "_";
-                return false;
-            }
-            if ((req.Contains("r") && p.Alignment != WdParagraphAlignment.wdAlignParagraphRight) ||
-                    !req.Contains("r") && p.Alignment == WdParagraphAlignment.wdAlignParagraphRight)
-            {
-                //output.Text += "error para_" + p.Range.Text + "_";
-                return false;
-            }
-            if ((req.Contains("c") && p.Alignment != WdParagraphAlignment.wdAlignParagraphCenter) ||
-                    !req.Contains("c") && p.Alignment == WdParagraphAlignment.wdAlignParagraphCenter)
-            {
-                //output.Text += "error para_" + p.Range.Text + "_";
-                return false;
-            }
             return true;
         }
 
