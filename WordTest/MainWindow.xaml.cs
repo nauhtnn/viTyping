@@ -58,7 +58,8 @@ namespace WordTest
         {
             if(workingDoc == null)
 				return;
-            MatchAlignment();
+            //MatchAlignment();
+            MatchFont();
         }
 
         private bool MatchAlignment()
@@ -120,10 +121,28 @@ namespace WordTest
             return true;
         }
 
-        private bool MatchNoFormatFont(Range r)
+        private bool MatchFont()
         {
-            if (r.Font.Bold != 0 || r.Font.Italic != 0 || r.Font.Underline != WdUnderline.wdUnderlineNone)
+            Range i = workingDoc.Characters.First,
+                j = modelDoc.Characters.First;
+            while (i != null && j != null)
+            {
+                if (i.Font.Size != j.Font.Size
+                    || i.Font.Name != j.Font.Name
+                    || i.Font.Color != j.Font.Color)
+                {
+                    MessageBox.Show(i.Text);
+                    return false;
+                }
+                i = i.Next();
+                j = j.Next();
+            }
+            if (i != null || j != null)
+            {
+                MessageBox.Show("one null");
                 return false;
+            }
+
             return true;
         }
 
