@@ -13,10 +13,16 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Office.Interop.Word;
-//using ProfileLibrary;
+using ProfileLibrary;
 
 namespace WordTest
 {
+    enum WORD_FMT
+    {
+        PROBLEM_DESC,
+        WORKING_FILE,
+        MODEL_FILE
+    }
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -26,8 +32,8 @@ namespace WordTest
         Microsoft.Office.Interop.Word.Application modelApp;
         Document workingDoc;
         Document modelDoc;
-        Dictionary<int, string> vReq1;
-        Dictionary<int, string> vReq2;
+
+        Problem problem;
 
         public MainWindow()
         {
@@ -58,8 +64,9 @@ namespace WordTest
         {
             if(workingDoc == null)
 				return;
-            //MatchAlignment();
+            MatchAlignment();
             MatchFont();
+            //MatchFont2();
         }
 
         private bool MatchAlignment()
@@ -91,34 +98,24 @@ namespace WordTest
             return true;
         }
 
-        private bool MatchFontRequirement(Range r, string req)
+        private void MatchFont2()
         {
-            if ((req.Contains("b") && r.Font.Bold == 0) ||
-                    !req.Contains("b") && r.Font.Bold != 0)
+            Range i = modelDoc.Words.First,
+                j = workingDoc.Words.First;
+            while(i != null && j != null)
             {
-                //output.Text += "error range_" + r.Text + "_";
-                return false;
+                if(//i.Font.Name != j.Font.Name ||
+                    i.Font.Size != j.Font.Size)// ||
+                    //i.Font.Color != j.Font.Color)
+                {
+                    MessageBox.Show(i.Text);
+                    return;
+                }
+                i = i.Next();
+                j = j.Next();
             }
-            if ((req.Contains("i") && r.Font.Italic == 0) ||
-                    !req.Contains("i") && r.Font.Italic != 0)
-            {
-                //output.Text += "error range_" + r.Text + "_";
-                return false;
-            }
-            if ((req.Contains("u") && r.Font.Underline == WdUnderline.wdUnderlineNone) ||
-                    !req.Contains("u") && r.Font.Underline != WdUnderline.wdUnderlineNone)
-            {
-                //output.Text += "error range_" + r.Text + "_";
-                return false;
-            }
-            return true;
-        }
-
-        private bool MatchNoFormatAlign(Microsoft.Office.Interop.Word.Paragraph p)
-        {
-            if (p.Alignment != WdParagraphAlignment.wdAlignParagraphLeft)
-                return false;
-            return true;
+            if (i != null || j != null)
+                MessageBox.Show("one not null");
         }
 
         private bool MatchFont()
@@ -220,63 +217,21 @@ namespace WordTest
 
             ScaleGUI();
 
-            //vReq1 = new Dictionary<int, string>();
-            //vReq2 = new Dictionary<int, string>();
-            //LoadRequirement(fReq.Text);
-
             GetWindow(this).Closing += MainWindow_Closing;
 
             
             modelApp = OpenWordApp(true);
             workingApp = OpenWordApp(false);
 
-            string curPath = System.IO.Directory.GetCurrentDirectory();
+            problem = new Problem();
+            problem.LoadID();
+            problem.Next();
 
             // Open documents
-            modelDoc = OpenDocument(curPath + "\\0_model.docx", modelApp);
-            workingDoc = OpenDocument(curPath + "\\0.docx", workingApp);
-        }
-
-        private void LoadRequirement(string fname)
-        {
-            if (!System.IO.File.Exists(fname))
-            {
-                MessageBox.Show("File not found: " + fname);
-                return;
-            }
-            string[] lines = System.IO.File.ReadAllLines(fname);
-            foreach(string s in lines)
-            {
-                string[] p = s.Split('\t');
-                if(2 == p.Length)
-                {
-                    int i;
-                    if (IsValidFontReq(p[1]) && int.TryParse(p[0], out i))
-                    {
-                        vReq1.Add(i, p[1]);
-                    }
-                    if (IsValidAlignReq(p[1]) && int.TryParse(p[0], out i))
-                    {
-                        vReq2.Add(i, p[1]);
-                    }
-                }
-            }
-        }
-
-        private bool IsValidFontReq(string s)
-        {
-            foreach (char c in s)
-                if ((c != 'b') && (c != 'i') && (c != 'u'))
-                    return false;
-            return true;
-        }
-
-        private bool IsValidAlignReq(string s)
-        {
-            foreach (char c in s)
-                if ((c != 'l') && (c != 'r') && (c != 'c'))
-                    return false;
-            return true;
+            modelDoc = OpenDocument(
+                problem.LookupFullPath(problem.Desc[WORD_FMT.MODEL_FILE.ToString()]), modelApp);
+            workingDoc = OpenDocument(
+                problem.LookupFullPath(problem.Desc[WORD_FMT.WORKING_FILE.ToString()]), workingApp);
         }
 
         private void MainApp_Initialized(object sender, EventArgs e) => ScaleGUI();
