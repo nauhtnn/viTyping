@@ -108,7 +108,7 @@ namespace WordTest
                 dummy = modelDoc.ReadOnly;
                 return true;
             }
-            catch (System.Runtime.InteropServices.COMException ex)
+            catch (System.Runtime.InteropServices.COMException)
             {
                 MessageBox.Show("Văn bản chưa được mở.\n" +
                     "Hướng dẫn:\n- Đóng tất cả cửa sổ MS Word.\n- Nhấn nút \"Khôi phục lại\".");
@@ -116,10 +116,25 @@ namespace WordTest
             }
         }
 
+        private void SetSpin(bool spin)
+        {
+            if(spin)
+            {
+                CheckBtn.Visibility = Visibility.Collapsed;
+                SpinningIcon.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                CheckBtn.Visibility = Visibility.Visible;
+                SpinningIcon.Visibility = Visibility.Collapsed;
+            }
+        }
+
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             if(!IsValid())
 				return;
+            SetSpin(true);
             workingApp.Selection.Collapse();
             modelApp.Selection.Collapse();
             if (!MatchText() ||
@@ -128,9 +143,11 @@ namespace WordTest
             {
                 MessageBox.Show("Hai văn bản không khớp.\n" +
                     "Hướng dẫn:\nLần lượt chọn từng văn bản.\nKiểm tra vị trí không khớp được đánh dấu.");
+                SetSpin(false);
                 return;
             }
             MessageBox.Show("Xin chúc mừng!");
+            SetSpin(false);
             CloseAllDocuments();
             NextProblem();
         }
