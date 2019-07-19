@@ -168,7 +168,13 @@ namespace WordTest
         {
             Range[] wr = workingDoc.Characters.Cast<Range>().ToArray(),
                 mr = modelDoc.Characters.Cast<Range>().ToArray();
-            for(int m = 0, n = 0; m < wr.Length; ++m, ++n)
+            for (int m = 0, n = 0; m < wr.Length; ++m, ++n)
+            {
+                if (wr[m].Text[0] < '0' ||
+                    ('9' < wr[m].Text[0] && wr[m].Text[0] < 'A') ||
+                    ('Z' < wr[m].Text[0] && wr[m].Text[0] < 'a') ||
+                    'z' < wr[m].Text[0])
+                    continue;
                 if (wr[m].Font.Bold != mr[n].Font.Bold ||
                     wr[m].Font.Italic != mr[n].Font.Italic ||
                     wr[m].Font.Size != mr[n].Font.Size ||
@@ -179,6 +185,7 @@ namespace WordTest
                     modelDoc.Range(n, Missing.Value).Select();
                     return false;
                 }
+            }
             //Range i = workingDoc.Characters.First,
             //    j = modelDoc.Characters.First;
             //while (i != null && j != null)
