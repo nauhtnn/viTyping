@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -21,7 +22,12 @@ namespace WordTest
     {
         PROBLEM_DESC,
         WORKING_FILE,
-        MODEL_FILE
+        MODEL_FILE,
+        ALIGNMENT,
+        FONT_SZ,
+        FONT_NAME,
+        FONT_COLOR,
+        FONT_STYLE
     }
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -62,11 +68,16 @@ namespace WordTest
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            if(workingDoc == null)
+            if(workingDoc == null || modelDoc == null)
 				return;
-            MatchAlignment();
-            MatchFont();
-            //MatchFont2();
+            workingApp.Selection.Collapse();
+            modelApp.Selection.Collapse();
+            if (!MatchAlignment())
+                return;
+            if (!MatchFont())
+                return;
+            CloseAllDocument();
+            NextProblem();
         }
 
         private bool MatchAlignment()
@@ -122,22 +133,44 @@ namespace WordTest
         {
             Range i = workingDoc.Characters.First,
                 j = modelDoc.Characters.First;
+            int k = 0;
             while (i != null && j != null)
             {
-                if (i.Font.Size != j.Font.Size
-                    || i.Font.Name != j.Font.Name
-                    || i.Font.Color != j.Font.Color)
+                Console.Write(i.Text + j.Text + " ");
+                if (i.Text != j.Text ||
+                    i.Font.Bold != j.Font.Bold ||
+                    i.Font.Italic != j.Font.Italic ||
+                    i.Font.Size != j.Font.Size ||
+                    i.Font.Name != j.Font.Name ||
+                    i.Font.Color != j.Font.Color)
                 {
-                    MessageBox.Show(i.Text);
+                    workingDoc.Range(i.Start, Missing.Value).Select();
+                    workingDoc.Activate();
+                    modelDoc.Range(j.Start, Missing.Value).Select();
+                    modelDoc.Activate();
                     return false;
                 }
+                ++k;
                 i = i.Next();
                 j = j.Next();
             }
-            if (i != null || j != null)
+            while (i != null)
             {
-                MessageBox.Show("one null");
-                return false;
+                if(i.Text != " " && i.Text != "\t" && i.Text != "\n" && i.Text != "\r")
+                {
+                    workingDoc.Range(i.Start, Missing.Value).Select();
+                    return false;
+                }
+                i = i.Next();
+            }
+            while(j != null)
+            {
+                if (j.Text != " " && j.Text != "\t" && j.Text != "\n" && j.Text != "\r")
+                {
+                    modelDoc.Range(j.Start, Missing.Value).Select();
+                    return false;
+                }
+                j = j.Next();
             }
 
             return true;
@@ -195,6 +228,27 @@ namespace WordTest
             return doc;
         }
 
+        private void CloseDocument(Document doc)
+        {
+            try
+            {
+                doc.Saved = true;
+                doc.Close();
+            }
+            catch (System.Runtime.InteropServices.COMException ex)
+            {
+                MessageBox.Show("Cannot open document!" + ex.ToString());
+            }
+        }
+
+        private void CloseAllDocument()
+        {
+            CloseDocument(workingDoc);
+            workingDoc = null;
+            CloseDocument(modelDoc);
+            modelDoc = null;
+        }
+
         private void ScaleGUI()
         {
             var area = SystemParameters.WorkArea;
@@ -224,8 +278,17 @@ namespace WordTest
             workingApp = OpenWordApp(false);
 
             problem = new Problem();
+            problem.ReadMap();
             problem.LoadID();
+
+            NextProblem();
+        }
+
+        private void NextProblem()
+        {
             problem.Next();
+
+            ProblemDesc.Text = problem.Desc[WORD_FMT.PROBLEM_DESC.ToString()];
 
             // Open documents
             modelDoc = OpenDocument(

@@ -37,7 +37,7 @@ namespace ProfileLibrary
             if(System.IO.File.Exists(path))
                 return path;
             path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) +
-                "\\" + TopicPath + file;
+                "\\WordTest\\" + TopicPath + file;
             if (System.IO.File.Exists(path))
                 return path;
             return null;
@@ -54,8 +54,10 @@ namespace ProfileLibrary
                 if(IndexMap.TryGetValue(nextID, out path) && path != null)
                     path = LookupFullPath(path);
                 if (path == null)
+                {
                     path = nextID.ToString() + ".txt";
-                path = LookupFullPath(path);
+                    path = LookupFullPath(path);
+                }
                 --max_attempt;
             }
             while (0 < max_attempt && path == null);
