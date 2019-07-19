@@ -7,3 +7,8 @@ ProfileLibrary/bin/
 ProfileLibrary/obj/
 viTyping/ProfileLibrary/bin/
 viTyping/ProfileLibrary/obj/
+.vs/viTyping/v15/.suo
+.vs/viTyping/v15/Server/sqlite3/db.lock
+.vs/viTyping/v15/Server/sqlite3/storage.ide
+.vs/viTyping/v15/Server/sqlite3/storage.ide-shm
+.vs/viTyping/v15/Server/sqlite3/storage.ide-wal
