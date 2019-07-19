@@ -48,27 +48,51 @@ namespace WordTest
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            QuitWordApps();
+            QuitAllWordApps();
         }
 
-        private void QuitWordApps()
+        private void QuitWordApp(Microsoft.Office.Interop.Word.Application app)
+        {
+            if (app == null)
+                return;
+            try
+            {
+                foreach (Document d in app.Documents)
+                    CloseWordDocument(d);
+                app.Quit();
+            }
+            catch (System.Runtime.InteropServices.COMException)
+            {
+                MessageBox.Show("Quiting Word app exception!");
+            }
+        }
+
+        private void QuitAllWordApps()
+        {
+            QuitWordApp(workingApp);
+            QuitWordApp(modelApp);
+        }
+
+        private bool IsValid()
         {
             try
             {
-                workingDoc.Saved = true;
-                workingDoc.Close();
-                modelDoc.Saved = true;
-                modelDoc.Close();
-                workingApp.Quit();
-                modelApp.Quit();
+                bool dummy = workingApp.Visible;
+                dummy = workingDoc.ReadOnly;
+                dummy = modelApp.Visible;
+                dummy = modelDoc.ReadOnly;
+                return true;
             }
-            catch (NullReferenceException) { }
-            catch (System.Runtime.InteropServices.COMException) { }
+            catch (System.Runtime.InteropServices.COMException ex)
+            {
+                MessageBox.Show("Document is not valid!\n");
+                return false;
+            }
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            if(workingDoc == null || modelDoc == null)
+            if(!IsValid())
 				return;
             workingApp.Selection.Collapse();
             modelApp.Selection.Collapse();
@@ -76,7 +100,7 @@ namespace WordTest
                 return;
             if (!MatchFont())
                 return;
-            CloseAllDocument();
+            CloseAllDocuments();
             NextProblem();
         }
 
@@ -178,7 +202,6 @@ namespace WordTest
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            QuitWordApps();
             Close();
         }
 
@@ -204,15 +227,15 @@ namespace WordTest
                     app.Left = 0;
                 }
             }
-            catch (System.Runtime.InteropServices.COMException ex)
+            catch (System.Runtime.InteropServices.COMException)
             {
-                MessageBox.Show("Cannot open app!" + ex.ToString());
+                MessageBox.Show("Opening Word app exception!");
                 app = null;
             }
             return app;
         }
 
-        private Document OpenDocument(string path, Microsoft.Office.Interop.Word.Application app)
+        private Document OpenWordDocument(string path, Microsoft.Office.Interop.Word.Application app)
         {
             Document doc;
 
@@ -220,32 +243,34 @@ namespace WordTest
             {
                 doc = app.Documents.Open(path, ReadOnly: app == modelApp);
             }
-            catch (System.Runtime.InteropServices.COMException ex)
+            catch (System.Runtime.InteropServices.COMException)
             {
-                MessageBox.Show("Cannot open document!" + ex.ToString());
+                MessageBox.Show("Opening Word document exception!");
                 doc = null;
             }
             return doc;
         }
 
-        private void CloseDocument(Document doc)
+        private void CloseWordDocument(Document doc)
         {
+            if (doc == null)
+                return;
             try
             {
                 doc.Saved = true;
                 doc.Close();
             }
-            catch (System.Runtime.InteropServices.COMException ex)
+            catch (System.Runtime.InteropServices.COMException)
             {
-                MessageBox.Show("Cannot open document!" + ex.ToString());
+                MessageBox.Show("Closing Word document exception!");
             }
         }
 
-        private void CloseAllDocument()
+        private void CloseAllDocuments()
         {
-            CloseDocument(workingDoc);
+            CloseWordDocument(workingDoc);
             workingDoc = null;
-            CloseDocument(modelDoc);
+            CloseWordDocument(modelDoc);
             modelDoc = null;
         }
 
@@ -291,9 +316,9 @@ namespace WordTest
             ProblemDesc.Text = problem.Desc[WORD_FMT.PROBLEM_DESC.ToString()];
 
             // Open documents
-            modelDoc = OpenDocument(
+            modelDoc = OpenWordDocument(
                 problem.LookupFullPath(problem.Desc[WORD_FMT.MODEL_FILE.ToString()]), modelApp);
-            workingDoc = OpenDocument(
+            workingDoc = OpenWordDocument(
                 problem.LookupFullPath(problem.Desc[WORD_FMT.WORKING_FILE.ToString()]), workingApp);
         }
 
