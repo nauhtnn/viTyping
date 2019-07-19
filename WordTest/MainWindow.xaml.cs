@@ -73,6 +73,31 @@ namespace WordTest
             QuitWordApp(modelApp);
         }
 
+        private bool MatchText()
+        {
+            char[] wc = workingDoc.Content.Text.ToCharArray(),
+                mc = modelDoc.Content.Text.ToCharArray();
+            int i = 0, j = 0;
+            for(; i < wc.Length && j < mc.Length; ++i, ++j)
+                if(wc[i] != mc[j])
+                {
+                    workingDoc.Range(i, Missing.Value).Select();
+                    modelDoc.Range(j, Missing.Value).Select();
+                    return false;
+                }
+            if(i < wc.Length)
+            {
+                workingDoc.Range(i, Missing.Value).Select();
+                return false;
+            }
+            if (j < mc.Length)
+            {
+                modelDoc.Range(j, Missing.Value).Select();
+                return false;
+            }
+            return true;
+        }
+
         private bool IsValid()
         {
             try
@@ -96,6 +121,8 @@ namespace WordTest
 				return;
             workingApp.Selection.Collapse();
             modelApp.Selection.Collapse();
+            if (!MatchText())
+                return;
             if (!MatchAlignment())
                 return;
             if (!MatchFont())
@@ -104,55 +131,35 @@ namespace WordTest
             NextProblem();
         }
 
+        //MatchText already checked 2 documents have the same text
         private bool MatchAlignment()
         {
-            if (workingDoc.Paragraphs.Count != modelDoc.Paragraphs.Count)
-            {
-                MessageBox.Show("Khác số lượng đoạn văn.");
-                return false;
-            }
-            Queue<Microsoft.Office.Interop.Word.Paragraph> workingParagraphs =
+            Queue<Microsoft.Office.Interop.Word.Paragraph> wp =
                 new Queue<Microsoft.Office.Interop.Word.Paragraph>();
             foreach (Microsoft.Office.Interop.Word.Paragraph p in workingDoc.Paragraphs)
-                workingParagraphs.Enqueue(p);
-            Queue<Microsoft.Office.Interop.Word.Paragraph> modelParagraphs =
+                wp.Enqueue(p);
+            Queue<Microsoft.Office.Interop.Word.Paragraph> mp =
                 new Queue<Microsoft.Office.Interop.Word.Paragraph>();
             foreach (Microsoft.Office.Interop.Word.Paragraph p in modelDoc.Paragraphs)
-                modelParagraphs.Enqueue(p);
+                mp.Enqueue(p);
             int i = 0;
-            while(workingParagraphs.Count() > 0)
+            while(wp.Count() > 0)
             {
-                if(workingParagraphs.Dequeue().Alignment != modelParagraphs.Dequeue().Alignment)
+                if(wp.Peek().Alignment != mp.Peek().Alignment)
                 {
-                    MessageBox.Show("Unmatched alignment at line " + i);
+                    wp.Peek().Range.Select();
+                    mp.Peek().Range.Select();
                     return false;
                 }
+                wp.Dequeue();
+                mp.Dequeue();
                 ++i;
             }
 
             return true;
         }
 
-        private void MatchFont2()
-        {
-            Range i = modelDoc.Words.First,
-                j = workingDoc.Words.First;
-            while(i != null && j != null)
-            {
-                if(//i.Font.Name != j.Font.Name ||
-                    i.Font.Size != j.Font.Size)// ||
-                    //i.Font.Color != j.Font.Color)
-                {
-                    MessageBox.Show(i.Text);
-                    return;
-                }
-                i = i.Next();
-                j = j.Next();
-            }
-            if (i != null || j != null)
-                MessageBox.Show("one not null");
-        }
-
+        //MatchText already checked 2 documents have the same text
         private bool MatchFont()
         {
             Range i = workingDoc.Characters.First,
@@ -160,40 +167,18 @@ namespace WordTest
             int k = 0;
             while (i != null && j != null)
             {
-                Console.Write(i.Text + j.Text + " ");
-                if (i.Text != j.Text ||
-                    i.Font.Bold != j.Font.Bold ||
+                if (i.Font.Bold != j.Font.Bold ||
                     i.Font.Italic != j.Font.Italic ||
                     i.Font.Size != j.Font.Size ||
                     i.Font.Name != j.Font.Name ||
                     i.Font.Color != j.Font.Color)
                 {
                     workingDoc.Range(i.Start, Missing.Value).Select();
-                    workingDoc.Activate();
                     modelDoc.Range(j.Start, Missing.Value).Select();
-                    modelDoc.Activate();
                     return false;
                 }
                 ++k;
                 i = i.Next();
-                j = j.Next();
-            }
-            while (i != null)
-            {
-                if(i.Text != " " && i.Text != "\t" && i.Text != "\n" && i.Text != "\r")
-                {
-                    workingDoc.Range(i.Start, Missing.Value).Select();
-                    return false;
-                }
-                i = i.Next();
-            }
-            while(j != null)
-            {
-                if (j.Text != " " && j.Text != "\t" && j.Text != "\n" && j.Text != "\r")
-                {
-                    modelDoc.Range(j.Start, Missing.Value).Select();
-                    return false;
-                }
                 j = j.Next();
             }
 
