@@ -110,7 +110,8 @@ namespace WordTest
             }
             catch (System.Runtime.InteropServices.COMException ex)
             {
-                MessageBox.Show("Document is not valid!\n");
+                MessageBox.Show("Văn bản chưa được mở.\n" +
+                    "Hướng dẫn:\n- Đóng tất cả cửa sổ MS Word.\n- Nhấn nút \"Khôi phục lại\".");
                 return false;
             }
         }
@@ -121,12 +122,15 @@ namespace WordTest
 				return;
             workingApp.Selection.Collapse();
             modelApp.Selection.Collapse();
-            if (!MatchText())
+            if (!MatchText() ||
+                !MatchAlignment() ||
+                !MatchFont())
+            {
+                MessageBox.Show("Hai văn bản không khớp.\n" +
+                    "Hướng dẫn:\nLần lượt chọn từng văn bản.\nKiểm tra vị trí không khớp được đánh dấu.");
                 return;
-            if (!MatchAlignment())
-                return;
-            if (!MatchFont())
-                return;
+            }
+            MessageBox.Show("Xin chúc mừng!");
             CloseAllDocuments();
             NextProblem();
         }
@@ -162,25 +166,36 @@ namespace WordTest
         //MatchText already checked 2 documents have the same text
         private bool MatchFont()
         {
-            Range i = workingDoc.Characters.First,
-                j = modelDoc.Characters.First;
-            int k = 0;
-            while (i != null && j != null)
-            {
-                if (i.Font.Bold != j.Font.Bold ||
-                    i.Font.Italic != j.Font.Italic ||
-                    i.Font.Size != j.Font.Size ||
-                    i.Font.Name != j.Font.Name ||
-                    i.Font.Color != j.Font.Color)
+            Range[] wr = workingDoc.Characters.Cast<Range>().ToArray(),
+                mr = modelDoc.Characters.Cast<Range>().ToArray();
+            for(int m = 0, n = 0; m < wr.Length; ++m, ++n)
+                if (wr[m].Font.Bold != mr[n].Font.Bold ||
+                    wr[m].Font.Italic != mr[n].Font.Italic ||
+                    wr[m].Font.Size != mr[n].Font.Size ||
+                    wr[m].Font.Name != mr[n].Font.Name ||
+                    wr[m].Font.Color != mr[n].Font.Color)
                 {
-                    workingDoc.Range(i.Start, Missing.Value).Select();
-                    modelDoc.Range(j.Start, Missing.Value).Select();
+                    workingDoc.Range(m, Missing.Value).Select();
+                    modelDoc.Range(n, Missing.Value).Select();
                     return false;
                 }
-                ++k;
-                i = i.Next();
-                j = j.Next();
-            }
+            //Range i = workingDoc.Characters.First,
+            //    j = modelDoc.Characters.First;
+            //while (i != null && j != null)
+            //{
+            //    if (i.Font.Bold != j.Font.Bold ||
+            //        i.Font.Italic != j.Font.Italic ||
+            //        i.Font.Size != j.Font.Size ||
+            //        i.Font.Name != j.Font.Name ||
+            //        i.Font.Color != j.Font.Color)
+            //    {
+            //        workingDoc.Range(i.Start, Missing.Value).Select();
+            //        modelDoc.Range(j.Start, Missing.Value).Select();
+            //        return false;
+            //    }
+            //    i = i.Next();
+            //    j = j.Next();
+            //}
 
             return true;
         }
@@ -214,7 +229,8 @@ namespace WordTest
             }
             catch (System.Runtime.InteropServices.COMException)
             {
-                MessageBox.Show("Opening Word app exception!");
+                MessageBox.Show("Xảy ra lỗi khi mở ứng dụng MS Word\n" +
+                    "Hướng dẫn: Thử mở một cửa sổ MS Word.");
                 app = null;
             }
             return app;
