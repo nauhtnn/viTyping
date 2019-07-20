@@ -129,6 +129,27 @@ namespace WordTest
                 SpinningIcon.Visibility = Visibility.Collapsed;
             }
         }
+		
+		private void MatchAll()
+		{
+			if (!MatchText() ||
+                !MatchAlignment() ||
+                !MatchFont())
+            {
+				Dispatcher.Invoke(() => {
+					SetSpin(false);
+                    MessageBox.Show("Hai văn bản không khớp.\n" +
+                    "Hướng dẫn:\nLần lượt chọn từng văn bản.\nKiểm tra vị trí không khớp được đánh dấu.");
+                    });
+                return;
+            }
+			Dispatcher.Invoke(() => {
+				SetSpin(false);
+				MessageBox.Show("Xin chúc mừng!");
+				CloseAllDocuments();
+				NextProblem();
+			});
+		}
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -137,19 +158,8 @@ namespace WordTest
             SetSpin(true);
             workingApp.Selection.Collapse();
             modelApp.Selection.Collapse();
-            if (!MatchText() ||
-                !MatchAlignment() ||
-                !MatchFont())
-            {
-                MessageBox.Show("Hai văn bản không khớp.\n" +
-                    "Hướng dẫn:\nLần lượt chọn từng văn bản.\nKiểm tra vị trí không khớp được đánh dấu.");
-                SetSpin(false);
-                return;
-            }
-            MessageBox.Show("Xin chúc mừng!");
-            SetSpin(false);
-            CloseAllDocuments();
-            NextProblem();
+			System.Threading.Thread th = new System.Threading.Thread(MatchAll);
+			th.Start();
         }
 
         //MatchText already checked 2 documents have the same text
@@ -347,6 +357,9 @@ namespace WordTest
                 problem.LookupFullPath(problem.Desc[WORD_FMT.WORKING_FILE.ToString()]), workingApp);
         }
 
-        private void MainApp_Initialized(object sender, EventArgs e) => ScaleGUI();
+        private void MainApp_Initialized(object sender, EventArgs e)
+		{
+			ScaleGUI();
+		}
     }
 }
