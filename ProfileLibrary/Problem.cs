@@ -13,11 +13,11 @@ namespace ProfileLibrary
 
         public int ID { get; private set; }
 
-        private string TopicPath;
+        private string Topic;
 
         public Problem()
         {
-            TopicPath = string.Empty;
+            Topic = string.Empty;
             ID = 0;
             IndexMap = new SortedDictionary<int, string>();
             Desc = new SortedDictionary<string, string>();
@@ -25,7 +25,7 @@ namespace ProfileLibrary
 
         public Problem(string topic)
         {
-            TopicPath = topic;
+            Topic = topic;
             ID = 0;
             IndexMap = new SortedDictionary<int, string>();
             Desc = new SortedDictionary<string, string>();
@@ -33,11 +33,11 @@ namespace ProfileLibrary
 
         public string LookupFullPath(string file)
         {
-            string path = System.IO.Directory.GetCurrentDirectory() + "\\" + TopicPath + file;
+            string path = System.IO.Directory.GetCurrentDirectory() + "\\" + Topic + "Data\\" + file;
             if(System.IO.File.Exists(path))
                 return path;
             path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) +
-                "\\WordTest\\" + TopicPath + file;
+                "\\" + Topic + "Data\\" + file;
             if (System.IO.File.Exists(path))
                 return path;
             return null;
@@ -72,6 +72,7 @@ namespace ProfileLibrary
             {
                 ReadDesc(p);
                 ID = nextID;
+                SaveID();
                 return true;
             }
 
@@ -86,7 +87,12 @@ namespace ProfileLibrary
             {
                 string[] tokens = line.Split('\t');
                 if (tokens.Length == 2)
-                    Desc.Add(tokens[0], tokens[1]);
+                {
+                    if (Desc.ContainsKey(tokens[0]))
+                        Desc[tokens[0]] = tokens[1];
+                    else
+                        Desc.Add(tokens[0], tokens[1]);
+                }
             }
         }
 
@@ -101,7 +107,12 @@ namespace ProfileLibrary
                     string[] tokens = i.Split('\t');
                     int idx;
                     if (tokens.Length == 2 && int.TryParse(tokens[0], out idx))
-                        IndexMap.Add(idx, tokens[1]);
+                    {
+                        if (IndexMap.ContainsKey(idx))
+                            IndexMap[idx] = tokens[1];
+                        else
+                            IndexMap.Add(idx, tokens[1]);
+                    }
                 }
             }
         }

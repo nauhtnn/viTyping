@@ -24,10 +24,8 @@ namespace WordTest
         WORKING_FILE,
         MODEL_FILE,
         ALIGNMENT,
-        FONT_SZ,
-        FONT_NAME,
-        FONT_COLOR,
-        FONT_STYLE
+        FONT,
+        TABLE
     }
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -77,24 +75,23 @@ namespace WordTest
         {
             char[] wc = workingDoc.Content.Text.ToCharArray(),
                 mc = modelDoc.Content.Text.ToCharArray();
-            int i = 0, j = 0;
-            for(; i < wc.Length && j < mc.Length; ++i, ++j)
-                if(wc[i] != mc[j])
+            if (wc.Length < mc.Length)
+            {
+                modelDoc.Range(wc.Length, Missing.Value).Select();
+                return false;
+            }
+            if (wc.Length > mc.Length)
+            {
+                workingDoc.Range(mc.Length, Missing.Value).Select();
+                return false;
+            }
+            for (int i = 0; i < wc.Length; ++i)
+                if(wc[i] != mc[i])
                 {
                     workingDoc.Range(i, Missing.Value).Select();
-                    modelDoc.Range(j, Missing.Value).Select();
+                    modelDoc.Range(i, Missing.Value).Select();
                     return false;
                 }
-            if(i < wc.Length)
-            {
-                workingDoc.Range(i, Missing.Value).Select();
-                return false;
-            }
-            if (j < mc.Length)
-            {
-                modelDoc.Range(j, Missing.Value).Select();
-                return false;
-            }
             return true;
         }
 
@@ -132,24 +129,37 @@ namespace WordTest
 		
 		private void MatchAll()
 		{
-			if (!MatchText() ||
-                !MatchAlignment() ||
+            bool isMatched = true;
+            //if (!MatchText())
+            //    isMatched = false;
+            if (isMatched && problem.Desc.ContainsKey(WORD_FMT.ALIGNMENT.ToString()) &&
+                problem.Desc[WORD_FMT.ALIGNMENT.ToString()] == "1" &&
+                !MatchAlignment())
+                isMatched = false;
+            if (isMatched && problem.Desc.ContainsKey(WORD_FMT.FONT.ToString()) &&
+                problem.Desc[WORD_FMT.FONT.ToString()] == "1" &&
                 !MatchFont())
+                isMatched = false;
+            if (isMatched && problem.Desc.ContainsKey(WORD_FMT.TABLE.ToString()) &&
+                problem.Desc[WORD_FMT.TABLE.ToString()] == "1" &&
+                !MatchTable())
+                isMatched = false;
+            if (isMatched)
             {
-				Dispatcher.Invoke(() => {
-					SetSpin(false);
-                    MessageBox.Show("Hai văn bản không khớp.\n" +
-                    "Hướng dẫn:\nLần lượt chọn từng văn bản.\nKiểm tra vị trí không khớp được đánh dấu.");
-                    });
+                Dispatcher.Invoke(() => {
+                    SetSpin(false);
+                    MessageBox.Show("Xin chúc mừng!");
+                    CloseAllDocuments();
+                    NextProblem();
+                });
                 return;
             }
-			Dispatcher.Invoke(() => {
-				SetSpin(false);
-				MessageBox.Show("Xin chúc mừng!");
-				CloseAllDocuments();
-				NextProblem();
-			});
-		}
+            Dispatcher.Invoke(() => {
+                SetSpin(false);
+                MessageBox.Show("Hai văn bản không khớp.\n" +
+                "Hướng dẫn:\nLần lượt chọn từng văn bản.\nKiểm tra vị trí không khớp được đánh dấu.");
+            });
+        }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -160,6 +170,49 @@ namespace WordTest
             modelApp.Selection.Collapse();
 			System.Threading.Thread th = new System.Threading.Thread(MatchAll);
 			th.Start();
+        }
+
+        private bool MatchTable()
+        {
+            if (workingDoc.Tables.Count < modelDoc.Tables.Count)
+            {
+                modelDoc.Tables.Cast<Microsoft.Office.Interop.Word.Table>().ToArray()[workingDoc.Tables.Count].Select();
+                return false;
+            }
+            if (workingDoc.Tables.Count > modelDoc.Tables.Count)
+            {
+                workingDoc.Tables.Cast<Microsoft.Office.Interop.Word.Table>().ToArray()[modelDoc.Tables.Count].Select();
+                return false;
+            }
+            Microsoft.Office.Interop.Word.Table[] wa =
+                workingDoc.Tables.Cast<Microsoft.Office.Interop.Word.Table>().ToArray(),
+                ma = modelDoc.Tables.Cast<Microsoft.Office.Interop.Word.Table>().ToArray();
+            //for (int i = 0, j = 0; i < workingDoc.Tables.Count && j < modelDoc.Tables.Count; ++i, ++j)
+            for (int i = 0; i < wa.Length; ++i)
+            {
+                Microsoft.Office.Interop.Word.Table wt = wa[i],
+                    mt = ma[i];
+                //runtime error, don't know why: Microsoft.Office.Interop.Word.Table wt = 
+                //    mt = modelDoc.Tables[j];
+                if (wt.Rows.Count != mt.Rows.Count ||
+                    wt.Columns.Count != mt.Columns.Count)
+                {
+                    wt.Select();
+                    mt.Select();
+                    return false;
+                }
+                int m = wt.Rows.Count,
+                    n = wt.Columns.Count;
+                for (int u = 0; u < m; ++u)
+                    for (int v = 0; v < n; ++v)
+                        if (wt.Cell(u, v).Range.Text != mt.Cell(u, v).Range.Text)
+                        {
+                            wt.Cell(u, v).Range.Select();
+                            mt.Cell(u, v).Range.Select();
+                            return false;
+                        }
+            }
+            return true;
         }
 
         //MatchText already checked 2 documents have the same text
@@ -337,7 +390,7 @@ namespace WordTest
             modelApp = OpenWordApp(true);
             workingApp = OpenWordApp(false);
 
-            problem = new Problem();
+            problem = new Problem("WordTest");
             problem.ReadMap();
             problem.LoadID();
 
