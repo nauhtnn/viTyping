@@ -23,6 +23,7 @@ namespace WordTest
         PROBLEM_DESC,
         WORKING_FILE,
         MODEL_FILE,
+        PLAIN_TEXT,
         ALIGNMENT,
         FONT,
         TABLE
@@ -71,7 +72,7 @@ namespace WordTest
             QuitWordApp(modelApp);
         }
 
-        private bool MatchText()
+        private bool MatchPlainText()
         {
             char[] wc = workingDoc.Content.Text.ToCharArray(),
                 mc = modelDoc.Content.Text.ToCharArray();
@@ -130,8 +131,10 @@ namespace WordTest
 		private void MatchAll()
 		{
             bool isMatched = true;
-            //if (!MatchText())
-            //    isMatched = false;
+            if (isMatched && problem.Desc.ContainsKey(WORD_FMT.PLAIN_TEXT.ToString()) &&
+                problem.Desc[WORD_FMT.PLAIN_TEXT.ToString()] == "1" &&
+                !MatchPlainText())
+                isMatched = false;
             if (isMatched && problem.Desc.ContainsKey(WORD_FMT.ALIGNMENT.ToString()) &&
                 problem.Desc[WORD_FMT.ALIGNMENT.ToString()] == "1" &&
                 !MatchAlignment())
@@ -172,28 +175,23 @@ namespace WordTest
 			th.Start();
         }
 
+        //Document.Tables, Table.Cell starts from 1, not 0
         private bool MatchTable()
         {
             if (workingDoc.Tables.Count < modelDoc.Tables.Count)
             {
-                modelDoc.Tables.Cast<Microsoft.Office.Interop.Word.Table>().ToArray()[workingDoc.Tables.Count].Select();
+                modelDoc.Tables[workingDoc.Tables.Count + 1].Select();
                 return false;
             }
             if (workingDoc.Tables.Count > modelDoc.Tables.Count)
             {
-                workingDoc.Tables.Cast<Microsoft.Office.Interop.Word.Table>().ToArray()[modelDoc.Tables.Count].Select();
+                workingDoc.Tables[modelDoc.Tables.Count + 1].Select();
                 return false;
             }
-            Microsoft.Office.Interop.Word.Table[] wa =
-                workingDoc.Tables.Cast<Microsoft.Office.Interop.Word.Table>().ToArray(),
-                ma = modelDoc.Tables.Cast<Microsoft.Office.Interop.Word.Table>().ToArray();
-            //for (int i = 0, j = 0; i < workingDoc.Tables.Count && j < modelDoc.Tables.Count; ++i, ++j)
-            for (int i = 0; i < wa.Length; ++i)
+            for (int i = 1, j = 1; i <= workingDoc.Tables.Count && j <= modelDoc.Tables.Count; ++i, ++j)
             {
-                Microsoft.Office.Interop.Word.Table wt = wa[i],
-                    mt = ma[i];
-                //runtime error, don't know why: Microsoft.Office.Interop.Word.Table wt = 
-                //    mt = modelDoc.Tables[j];
+                Microsoft.Office.Interop.Word.Table wt = workingDoc.Tables[i],
+                mt = modelDoc.Tables[j];
                 if (wt.Rows.Count != mt.Rows.Count ||
                     wt.Columns.Count != mt.Columns.Count)
                 {
@@ -201,21 +199,23 @@ namespace WordTest
                     mt.Select();
                     return false;
                 }
-                int m = wt.Rows.Count,
-                    n = wt.Columns.Count;
-                for (int u = 0; u < m; ++u)
-                    for (int v = 0; v < n; ++v)
+                for (int u = wt.Rows.Count; u > 0; --u)
+                {
+                    for (int v = wt.Columns.Count; v > 0; --v)
+                    {
                         if (wt.Cell(u, v).Range.Text != mt.Cell(u, v).Range.Text)
                         {
-                            wt.Cell(u, v).Range.Select();
-                            mt.Cell(u, v).Range.Select();
+                            wt.Cell(u, v).Select();
+                            mt.Cell(u, v).Select();
                             return false;
                         }
+                    }
+                }
             }
             return true;
         }
 
-        //MatchText already checked 2 documents have the same text
+        //MatchPlainText already checked 2 documents have the same text
         private bool MatchAlignment()
         {
             Queue<Microsoft.Office.Interop.Word.Paragraph> wp =
@@ -243,7 +243,7 @@ namespace WordTest
             return true;
         }
 
-        //MatchText already checked 2 documents have the same text
+        //MatchPlainText already checked 2 documents have the same text
         private bool MatchFont()
         {
             Range[] wr = workingDoc.Characters.Cast<Range>().ToArray(),
