@@ -11,11 +11,12 @@
 		WindowStyle="None"
         d:DesignHeight="720" d:DesignWidth="1280"
 		Height="80">
+    <!--:fa="http://schemas.fontawesome.io/icons/"-->
     <DockPanel x:Name="MainApp" Loaded="Main_Loaded" Width="1280" Initialized="MainApp_Initialized" Margin="0">
         <TextBlock x:Name="ProblemDesc" Background="#1c64e7" Foreground="#fff"
                        FontSize="22"
                        Height="80" DockPanel.Dock="Left"  Width="960" Margin="0" Padding="0" TextWrapping="Wrap"/>
-        <fa:ImageAwesome x:Name="SpinningIcon" Icon="Refresh" Spin="True" Height="64" Width="80" DockPanel.Dock="Left" Visibility="Collapsed"/>
+        <fa:ImageAwesome x:Name="SpinningIcon" Icon="Refresh"  Spin="True" Height="64" Width="80" DockPanel.Dock="Left" Visibility="Collapsed"/>
         <Button x:Name="CheckBtn" Content="Kiểm tra" Width="160" Click="Button_Click" FontSize="24" Foreground="White" Background="Green" Margin="0" Padding="0"/>
         <Button x:Name="ExitBtn" Content="Thoát" Width="160" Click="Button_Click_1" FontSize="24" Foreground="White" Background="OrangeRed" Margin="0" Padding="0"/>
     </DockPanel>

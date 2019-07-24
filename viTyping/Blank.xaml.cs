@@ -2,16 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.IO;
 using ProfileLibrary;
 
@@ -276,28 +271,51 @@ namespace viTyping
                 if (0 < RemainingTime.Ticks)
                 {
                     RemainingTime = TestDuration - (DateTime.Now - StartTime);
+#if NET35
+                    Action x = () =>
+                    {
+                        txtRTime.Text = RemainingTime.Minutes.ToString() + " : " + RemainingTime.Seconds;
+                    };
+                    Dispatcher.Invoke(x);
+#else
                     Dispatcher.Invoke(() =>
                     {
                         txtRTime.Text = RemainingTime.Minutes.ToString() + " : " + RemainingTime.Seconds;
                     });
+#endif
                 }
                 else
                 {
                     RemainingTime = new TimeSpan(0, 0, 0);
 					bRunning = false;
-					//mTimer.Elapsed -= UpdateSrvrMsg;
-					//mTimer.Enabled = false;
-					Dispatcher.Invoke(() =>
+                    //mTimer.Elapsed -= UpdateSrvrMsg;
+                    //mTimer.Enabled = false;
+#if NET35
+                    Action x = () =>
                     {
                         txtRTime.Text = RemainingTime.Minutes.ToString() + " : " + RemainingTime.Seconds;
-						UserText.IsEnabled = false;
-						MessageBox.Show("Bạn chưa nhập văn bản đúng theo mẫu!", "Hết giờ!");
+                        UserText.IsEnabled = false;
+                        MessageBox.Show("Bạn chưa nhập văn bản đúng theo mẫu!", "Hết giờ!");
                         //string txt = Grading() + " điểm";
                         //btnCheck.Content = txt;
-						//btnExit.IsEnabled = true;
+                        //btnExit.IsEnabled = true;
+                        //AppendGrade(txt);
+                        //System.IO.File.WriteAllText("f1.txt", UserText.Text);
+                    };
+                    Dispatcher.Invoke(x);
+#else
+                    Dispatcher.Invoke(() =>
+                    {
+                        txtRTime.Text = RemainingTime.Minutes.ToString() + " : " + RemainingTime.Seconds;
+                        UserText.IsEnabled = false;
+                        MessageBox.Show("Bạn chưa nhập văn bản đúng theo mẫu!", "Hết giờ!");
+                        //string txt = Grading() + " điểm";
+                        //btnCheck.Content = txt;
+                        //btnExit.IsEnabled = true;
                         //AppendGrade(txt);
                         //System.IO.File.WriteAllText("f1.txt", UserText.Text);
                     });
+#endif
                 }
             }
         }
