@@ -122,7 +122,7 @@ namespace ProfileLibrary
         public void LoadID()
         {
             string path = System.IO.Directory.GetCurrentDirectory() + "\\save.txt";
-            if (path != null)
+            if (System.IO.File.Exists(path))
                 ID = int.Parse(System.IO.File.ReadAllText(path));
             --ID;//method Next() will increase the ID
         }
