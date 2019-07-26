@@ -74,6 +74,8 @@ namespace WordTest
 
         private bool MatchPlainText()
         {
+            if (workingDoc.Content.Text == modelDoc.Content.Text)
+                return true;
             Microsoft.Office.Interop.Word.Paragraph p = workingDoc.Paragraphs.First,
                 q = modelDoc.Paragraphs.First;
             while (p != null && q != null)
@@ -239,8 +241,8 @@ namespace WordTest
         //MatchPlainText already checked 2 documents have the same text
         private bool MatchFont()
         {
-            Range[] wr = workingDoc.Characters.Cast<Range>().ToArray(),
-                mr = modelDoc.Characters.Cast<Range>().ToArray();
+            Range[] wr = workingDoc.Words.Cast<Range>().ToArray(),
+                mr = modelDoc.Words.Cast<Range>().ToArray();
             for (int m = 0, n = 0; m < wr.Length; ++m, ++n)
             {
                 if (wr[m].Text[0] < '0' ||
@@ -254,8 +256,8 @@ namespace WordTest
                     wr[m].Font.Name != mr[n].Font.Name ||
                     wr[m].Font.Color != mr[n].Font.Color)
                 {
-                    workingDoc.Range(m, Missing.Value).Select();
-                    modelDoc.Range(n, Missing.Value).Select();
+                    wr[m].Select();
+                    mr[n].Select();
                     return false;
                 }
             }
