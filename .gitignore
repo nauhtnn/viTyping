@@ -12,3 +12,7 @@ viTyping/ProfileLibrary/obj/
 .vs/viTyping/v15/Server/sqlite3/storage.ide
 .vs/viTyping/v15/Server/sqlite3/storage.ide-shm
 .vs/viTyping/v15/Server/sqlite3/storage.ide-wal
+WordTest/bin/Debug/WordTest.exe
+WordTest/bin/Debug/WordTest.exe.config
+WordTest/bin/Debug/WordTest.pdb
+WordTest/bin/Release/WordTest.exe
