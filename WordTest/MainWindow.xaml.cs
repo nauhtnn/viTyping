@@ -74,25 +74,46 @@ namespace WordTest
 
         private bool MatchPlainText()
         {
-            char[] wc = workingDoc.Content.Text.ToCharArray(),
-                mc = modelDoc.Content.Text.ToCharArray();
-            if (wc.Length < mc.Length)
+            Microsoft.Office.Interop.Word.Paragraph p = workingDoc.Paragraphs.First,
+                q = modelDoc.Paragraphs.First;
+            while(p != null && q != null)
             {
-                modelDoc.Range(wc.Length, Missing.Value).Select();
-                return false;
-            }
-            if (wc.Length > mc.Length)
-            {
-                workingDoc.Range(mc.Length, Missing.Value).Select();
-                return false;
-            }
-            for (int i = 0; i < wc.Length; ++i)
-                if(wc[i] != mc[i])
+                Range r = p.Range.Words.First,
+                    s = q.Range.Words.First;
+                while(r != null && s != null)
                 {
-                    workingDoc.Range(i, Missing.Value).Select();
-                    modelDoc.Range(i, Missing.Value).Select();
+                    if(r.Text != s.Text)
+                    {
+                        r.Select();
+                        s.Select();
+                        return false;
+                    }
+                    r = r.Next();
+                    s = s.Next();
+                }
+                if (r != null)
+                {
+                    r.Select();
                     return false;
                 }
+                if (s != null)
+                {
+                    s.Select();
+                    return false;
+                }
+                p = p.Next();
+                q = q.Next();
+            }
+            if(p != null)
+            {
+                p.Range.Select();
+                return false;
+            }
+            if (q != null)
+            {
+                q.Range.Select();
+                return false;
+            }
             return true;
         }
 
@@ -131,9 +152,7 @@ namespace WordTest
 		private void MatchAll()
 		{
             bool isMatched = true;
-            if (isMatched && problem.Desc.ContainsKey(WORD_FMT.PLAIN_TEXT.ToString()) &&
-                problem.Desc[WORD_FMT.PLAIN_TEXT.ToString()] == "1" &&
-                !MatchPlainText())
+            if (!MatchPlainText())
                 isMatched = false;
             if (isMatched && problem.Desc.ContainsKey(WORD_FMT.ALIGNMENT.ToString()) &&
                 problem.Desc[WORD_FMT.ALIGNMENT.ToString()] == "1" &&
@@ -218,28 +237,19 @@ namespace WordTest
         //MatchPlainText already checked 2 documents have the same text
         private bool MatchAlignment()
         {
-            Queue<Microsoft.Office.Interop.Word.Paragraph> wp =
-                new Queue<Microsoft.Office.Interop.Word.Paragraph>();
-            foreach (Microsoft.Office.Interop.Word.Paragraph p in workingDoc.Paragraphs)
-                wp.Enqueue(p);
-            Queue<Microsoft.Office.Interop.Word.Paragraph> mp =
-                new Queue<Microsoft.Office.Interop.Word.Paragraph>();
-            foreach (Microsoft.Office.Interop.Word.Paragraph p in modelDoc.Paragraphs)
-                mp.Enqueue(p);
-            int i = 0;
-            while(wp.Count() > 0)
+            Microsoft.Office.Interop.Word.Paragraph p = workingDoc.Paragraphs.First,
+                q = modelDoc.Paragraphs.First;
+            while(p != null)
             {
-                if(wp.Peek().Alignment != mp.Peek().Alignment)
+                if(p.Alignment != q.Alignment)
                 {
-                    wp.Peek().Range.Select();
-                    mp.Peek().Range.Select();
+                    p.Range.Select();
+                    q.Range.Select();
                     return false;
                 }
-                wp.Dequeue();
-                mp.Dequeue();
-                ++i;
+                p = p.Next();
+                q = q.Next();
             }
-
             return true;
         }
 
