@@ -76,35 +76,34 @@ namespace WordTest
         {
             Microsoft.Office.Interop.Word.Paragraph p = workingDoc.Paragraphs.First,
                 q = modelDoc.Paragraphs.First;
-            while(p != null && q != null)
+            while (p != null && q != null)
             {
-                Range r = p.Range.Words.First,
-                    s = q.Range.Words.First;
-                while(r != null && s != null)
+                Range[] r = p.Range.Characters.Cast<Range>().ToArray(),
+                    s = q.Range.Characters.Cast<Range>().ToArray();
+                int i, j;
+                for(i = 0, j = 0; i < r.Length && j < s.Length; ++i, ++j)
                 {
-                    if(r.Text != s.Text)
+                    if (r[i].Text != s[i].Text)
                     {
-                        r.Select();
-                        s.Select();
+                        r[i].Select();
+                        s[i].Select();
                         return false;
                     }
-                    r = r.Next();
-                    s = s.Next();
                 }
-                if (r != null)
+                if (i < r.Length)
                 {
-                    r.Select();
+                    r[i].Select();
                     return false;
                 }
-                if (s != null)
+                if (j < s.Length)
                 {
-                    s.Select();
+                    s[j].Select();
                     return false;
                 }
                 p = p.Next();
                 q = q.Next();
             }
-            if(p != null)
+            if (p != null)
             {
                 p.Range.Select();
                 return false;
@@ -197,40 +196,24 @@ namespace WordTest
         //Document.Tables, Table.Cell starts from 1, not 0
         private bool MatchTable()
         {
-            if (workingDoc.Tables.Count < modelDoc.Tables.Count)
-            {
-                modelDoc.Tables[workingDoc.Tables.Count + 1].Select();
-                return false;
-            }
-            if (workingDoc.Tables.Count > modelDoc.Tables.Count)
-            {
-                workingDoc.Tables[modelDoc.Tables.Count + 1].Select();
-                return false;
-            }
-            for (int i = 1, j = 1; i <= workingDoc.Tables.Count && j <= modelDoc.Tables.Count; ++i, ++j)
-            {
-                Microsoft.Office.Interop.Word.Table wt = workingDoc.Tables[i],
-                mt = modelDoc.Tables[j];
-                if (wt.Rows.Count != mt.Rows.Count ||
-                    wt.Columns.Count != mt.Columns.Count)
-                {
-                    wt.Select();
-                    mt.Select();
-                    return false;
-                }
-                for (int u = wt.Rows.Count; u > 0; --u)
-                {
-                    for (int v = wt.Columns.Count; v > 0; --v)
-                    {
-                        if (wt.Cell(u, v).Range.Text != mt.Cell(u, v).Range.Text)
-                        {
-                            wt.Cell(u, v).Select();
-                            mt.Cell(u, v).Select();
-                            return false;
-                        }
-                    }
-                }
-            }
+            //for (int i = 1, j = 1; i <= workingDoc.Tables.Count && j <= modelDoc.Tables.Count; ++i, ++j)
+            //{
+            //    Microsoft.Office.Interop.Word.Table wt = workingDoc.Tables[i],
+            //    mt = modelDoc.Tables[j];
+            //    for (int u = wt.Rows.Count; u > 0; --u)
+            //    {
+            //        for (int v = wt.Columns.Count; v > 0; --v)
+            //        {
+            //            if (wt.Cell(u, v).Range.Bold != mt.Cell(u, v).Range.Bold ||
+            //                wt.Cell(u, v).Range.Italic != mt.Cell(u, v).Range.Italic)
+            //            {
+            //                wt.Cell(u, v).Select();
+            //                mt.Cell(u, v).Select();
+            //                return false;
+            //            }
+            //        }
+            //    }
+            //}
             return true;
         }
 
@@ -276,23 +259,6 @@ namespace WordTest
                     return false;
                 }
             }
-            //Range i = workingDoc.Characters.First,
-            //    j = modelDoc.Characters.First;
-            //while (i != null && j != null)
-            //{
-            //    if (i.Font.Bold != j.Font.Bold ||
-            //        i.Font.Italic != j.Font.Italic ||
-            //        i.Font.Size != j.Font.Size ||
-            //        i.Font.Name != j.Font.Name ||
-            //        i.Font.Color != j.Font.Color)
-            //    {
-            //        workingDoc.Range(i.Start, Missing.Value).Select();
-            //        modelDoc.Range(j.Start, Missing.Value).Select();
-            //        return false;
-            //    }
-            //    i = i.Next();
-            //    j = j.Next();
-            //}
 
             return true;
         }
