@@ -238,6 +238,38 @@ namespace WordTest
             return true;
         }
 
+        private void MatchFont2()
+        {
+            string s = System.IO.Directory.GetCurrentDirectory();
+            workingDoc.SaveAs("C:/Users/minad/AppData/Local/WordTestData/tmp.docx");
+            DocumentFormat.OpenXml.Packaging.WordprocessingDocument doc = null;
+            try
+            {
+                doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(
+                    "C:/Users/minad/AppData/Local/WordTestData/con_Rong_chau_Tien.docx", false);
+            }
+            catch (DocumentFormat.OpenXml.Packaging.OpenXmlPackageException)
+            {
+                return;
+            }
+            catch (System.IO.IOException)
+            {
+                return;
+            }
+            DocumentFormat.OpenXml.Wordprocessing.Body body = doc.MainDocumentPart.Document.Body;
+            //int idx = -1;
+            foreach (DocumentFormat.OpenXml.Wordprocessing.Paragraph p in body.ChildElements.OfType<DocumentFormat.OpenXml.Wordprocessing.Paragraph>())
+            {
+                DocumentFormat.OpenXml.Wordprocessing.Run r = p.ChildElements.First<DocumentFormat.OpenXml.Wordprocessing.Run>();
+                while(r != null)
+                {
+                    Console.WriteLine(r.InnerText);
+                    r = r.NextSibling<DocumentFormat.OpenXml.Wordprocessing.Run>();
+                }
+            }
+            doc.Close();
+        }
+
         //MatchPlainText already checked 2 documents have the same text
         private bool MatchFont()
         {
