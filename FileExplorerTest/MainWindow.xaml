@@ -5,9 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FileExplorerTest"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <TextBox x:Name="DirToZip" HorizontalAlignment="Left" Height="27" Margin="243,113,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="208"/>
-        <Button Content="Zip" Click="Zip_Click" HorizontalAlignment="Left" Height="40" Margin="351,178,0,0" VerticalAlignment="Top" Width="125"/>
-    </Grid>
+        Title="File Explorer Test" Height="512" Width="512"
+        d:DesignHeight="720" d:DesignWidth="1280">
+    <StackPanel Orientation="Horizontal" Background="LightGray" x:Name="MainApp" Loaded="Main_Loaded" Initialized="MainApp_Initialized" Height="512" Width="480">
+        <StackPanel x:Name="ProblemDesc">
+            <TextBlock x:Name="DescText" HorizontalAlignment="Left" TextWrapping="Wrap" Text="Đề bài" VerticalAlignment="Top" Width="400" Background="#1c64e7" Foreground="#fff" FontSize="18"/>
+            <TreeView x:Name="DirTree" Visibility="Collapsed"></TreeView>
+        </StackPanel>
+        <Button x:Name="CheckBtn" Content="Kiểm tra" FontSize="18" Click="Zip_Click" HorizontalAlignment="Left" Height="40" VerticalAlignment="Top" Width="80" Foreground="White" Background="Green"/>
+    </StackPanel>
 </Window>
