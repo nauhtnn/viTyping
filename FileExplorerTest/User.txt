@@ -1,0 +1,5 @@
+PROBLEM_DESC	Vào thư mục Desktop\User, tạo cây thư mục theo mẫu.
+MODEL_FILE	User.zip
+WORKING_FILE	User
+TREE_VIEW	1
+RESET_DIR	1

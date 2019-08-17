@@ -1,0 +1,5 @@
+PROBLEM_DESC	Vào thư mục Desktop\album, tạo cây thư mục theo mẫu.
+MODEL_FILE	album.zip
+WORKING_FILE	album
+TREE_VIEW	1
+RESET_DIR	1
