@@ -15,7 +15,7 @@ namespace ProfileLibrary
         public Problem()
         {
             Topic = string.Empty;
-            ID = 1;
+            ID = 0;
             IndexMap = new SortedDictionary<int, string>();
             Desc = new SortedDictionary<string, string>();
         }
@@ -23,7 +23,7 @@ namespace ProfileLibrary
         public Problem(string topic)
         {
             Topic = topic;
-            ID = 1;
+            ID = 0;
             IndexMap = new SortedDictionary<int, string>();
             Desc = new SortedDictionary<string, string>();
         }
@@ -123,8 +123,10 @@ namespace ProfileLibrary
         {
             string path = System.IO.Directory.GetCurrentDirectory() + "\\save.txt";
             if (System.IO.File.Exists(path))
+            {
                 ID = int.Parse(System.IO.File.ReadAllText(path));
-            --ID;//method Next() will increase the ID
+                --ID;//method Next() will increase the ID
+            }
         }
     }
 }
