@@ -15,7 +15,7 @@ namespace ProfileLibrary
         public Problem()
         {
             Topic = string.Empty;
-            ID = 0;
+            ID = 1;
             IndexMap = new SortedDictionary<int, string>();
             Desc = new SortedDictionary<string, string>();
         }
@@ -23,7 +23,7 @@ namespace ProfileLibrary
         public Problem(string topic)
         {
             Topic = topic;
-            ID = 0;
+            ID = 1;
             IndexMap = new SortedDictionary<int, string>();
             Desc = new SortedDictionary<string, string>();
         }
