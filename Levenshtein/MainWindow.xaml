@@ -1,0 +1,30 @@
+﻿<Window x:Class="Levenshtein.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfApplication1"
+        mc:Ignorable="d"
+        Title="Levenshtein" Height="350" Width="525">
+    <Grid>
+        <TextBox x:Name="userText" AcceptsReturn="True" HorizontalAlignment="Left" Height="227" Margin="23,29,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="232"/>
+        <TextBox x:Name="sourceText" AcceptsReturn="True" HorizontalAlignment="Left" Height="226" Margin="260,30,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="247" RenderTransformOrigin="0.5,0.5">
+            <TextBox.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform AngleX="-0.317"/>
+                    <RotateTransform/>
+                    <TranslateTransform X="-0.517"/>
+                </TransformGroup>
+            </TextBox.RenderTransform>
+        </TextBox>
+        <Button Content="Grade" Background="Blue" Foreground="White" FontWeight="Bold" HorizontalAlignment="Left" Height="32" Margin="334,273,0,0" VerticalAlignment="Top" Width="82" Click="Button_Click"/>
+        <TextBlock Text="-" x:Name="Grade" Background="Orange" TextAlignment="Center" Foreground="White" FontWeight="Bold"  HorizontalAlignment="Center" Height="32" Margin="436,273,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="71"/>
+        <TextBox Text="10" TextAlignment="Center" x:Name="MaxGrade" HorizontalAlignment="Left" Height="32" Margin="93,273,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="48"/>
+        <Label Content="User text" HorizontalAlignment="Left" Height="24" Margin="23,0,0,0" VerticalAlignment="Top" Width="68"/>
+        <Label Content="Ideal text" HorizontalAlignment="Left" Height="24" Margin="260,0,0,0" VerticalAlignment="Top" Width="68"/>
+        <Label Content="Max grade" HorizontalAlignment="Left" Height="32" Margin="23,273,0,0" VerticalAlignment="Top" Width="68"/>
+        <Label Content="Round" HorizontalAlignment="Left" Height="32" Margin="172,273,0,0" VerticalAlignment="Top" Width="50"/>
+        <TextBox Text="1" TextAlignment="Center" x:Name="Round" HorizontalAlignment="Left" Height="32" Margin="222,273,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="48"/>
+    </Grid>
+</Window>

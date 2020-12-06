@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2026
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "viTyping", "viTyping\viTyping.csproj", "{FBBE4AE4-A2B1-47D8-92C4-4443D10FF0AA}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProfileLibrary", "ProfileLibrary\ProfileLibrary.csproj", "{7EBF1075-44D2-4B81-BF6B-BD82004C7E61}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileExplorerTest", "FileExplorerTest\FileExplorerTest.csproj", "{E84D2CFA-3632-47F2-AE90-3BD3D7B3F7F0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Levenshtein", "Levenshtein\Levenshtein.csproj", "{FB959E4B-2142-4291-A530-A76A2846C96B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,14 @@ Global
 		{E84D2CFA-3632-47F2-AE90-3BD3D7B3F7F0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E84D2CFA-3632-47F2-AE90-3BD3D7B3F7F0}.Release|x86.ActiveCfg = Release|Any CPU
 		{E84D2CFA-3632-47F2-AE90-3BD3D7B3F7F0}.Release|x86.Build.0 = Release|Any CPU
+		{FB959E4B-2142-4291-A530-A76A2846C96B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB959E4B-2142-4291-A530-A76A2846C96B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB959E4B-2142-4291-A530-A76A2846C96B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FB959E4B-2142-4291-A530-A76A2846C96B}.Debug|x86.Build.0 = Debug|Any CPU
+		{FB959E4B-2142-4291-A530-A76A2846C96B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB959E4B-2142-4291-A530-A76A2846C96B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB959E4B-2142-4291-A530-A76A2846C96B}.Release|x86.ActiveCfg = Release|Any CPU
+		{FB959E4B-2142-4291-A530-A76A2846C96B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
